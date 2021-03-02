@@ -1,4 +1,5 @@
 # fractal.py
+# this is a git test
 import taichi as ti
 
 ti.init(arch=ti.gpu)
