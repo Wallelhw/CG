@@ -41,9 +41,8 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 
 
 static bool insideTriangle(int x, int y, const Vector3f* _v)
-{   
-
-    Eigen::Vector3f _p = {(x+0.5f),(y+0.5f),0};
+{  
+    Eigen::Vector3f _p = {(x+0.5f),(y+0.5f),1};
     Eigen::Vector3f _s1 = _v[0] - _v[1];
     Eigen::Vector3f _p1 = _p - _v[1];
     Eigen::Vector3f _s2 = _v[1] - _v[2];
@@ -51,7 +50,10 @@ static bool insideTriangle(int x, int y, const Vector3f* _v)
     Eigen::Vector3f _s3 = _v[2] - _v[0];
     Eigen::Vector3f _p3 = _p - _v[0];
 
-    bool res = (_s1.cross(_p1).dot(_s2.cross(_p2))) * (_s2.cross(_p2).dot(_s3.cross(_p3))) > 0;
+    auto sign1=(_s1.cross(_p1)).dot(_s2.cross(_p2));
+    auto sign2=(_s1.cross(_p1)).dot(_s3.cross(_p3));
+    auto sign3=(_s2.cross(_p2)).dot(_s3.cross(_p3));
+    return ( sign1>=0 )&&( sign2>=0 )&&(sign3>=0);
     
 }
 
@@ -116,20 +118,15 @@ void rst::rasterizer::draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf
 //Screen space rasterization
 void rst::rasterizer::rasterize_triangle(const Triangle& t) {
     auto v = t.toVector4();
-    Eigen::Vector3f sides[3];
-    sides[0] = v[0].head<3>();
-    sides[1] = v[1].head<3>();
-    sides[2] = v[2].head<3>();
     
     auto x_range = std::minmax({v[0].x(),v[1].x(),v[2].x()});
     auto y_range = std::minmax({v[0].y(),v[1].y(),v[2].y()});
 
-    //std::cout<<x_range.first<<"    "<<x_range.second<<std::endl;
     for(int x=(int)x_range.first;x<=(int)x_range.second;x++)
     {
         for(int y=(int)y_range.first;y<=(int)y_range.second;y++)
         {
-            if(insideTriangle(x,y,sides))
+            if(insideTriangle(x,y,t.v))
             {
                 auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
                 float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
@@ -197,11 +194,11 @@ int rst::rasterizer::get_index(int x, int y)
     return (height-1-y)*width + x;
 }
 
-void rst::rasterizer::set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color)
+void rst::rasterizer::set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color,float rate)
 {
     //old index: auto ind = point.y() + point.x() * width;
     auto ind = (height-1-point.y())*width + point.x();
-    frame_buf[ind] = color;
+    frame_buf[ind] = color * rate;
 
 }
 
