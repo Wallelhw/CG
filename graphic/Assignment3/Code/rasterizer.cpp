@@ -259,7 +259,7 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 //Screen space rasterization
 void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos) 
 {
-    // TODO: From your HW3, get the triangle rasterization code.
+    // TODO: From your HW2, get the triangle rasterization code.
     // TODO: Inside your rasterization loop:
     //    * v[i].w() is the vertex view space depth value z.
     //    * Z is interpolated view space depth for the current pixel
@@ -279,7 +279,35 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
     // Use: payload.view_pos = interpolated_shadingcoords;
     // Use: Instead of passing the triangle's color directly to the frame buffer, pass the color to the shaders first to get the final color;
     // Use: auto pixel_color = fragment_shader(payload);
+    auto v = t.toVector4(); 
+    auto x_range = std::minmax({v[0].x(),v[1].x(),v[2].x()});
+    auto y_range = std::minmax({v[0].y(),v[1].y(),v[2].y()});
 
+    for(int x=(int)x_range.first;x<=(int)x_range.second;x++)
+    {
+        for(int y=(int)y_range.first;y<=(int)y_range.second;y++)
+        {
+            if(insideTriangle(x,y,t.v))
+            {
+                auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
+                float Z = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                float zp = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                zp *= Z;
+
+                auto payload = fragment_shader_payload();
+                fragment_shader(payload);
+
+                int index=get_index(x,y);
+                if (zp < depth_buf[index])
+                {
+                    depth_buf[index]=zp;
+                    auto point = Eigen::Vector3f(x,y,1.0f);
+                    auto color = t.getColor();
+                    set_pixel(point,color);
+                }
+            }
+        }
+    }
  
 }
 
