@@ -194,12 +194,11 @@ int rst::rasterizer::get_index(int x, int y)
     return (height-1-y)*width + x;
 }
 
-void rst::rasterizer::set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color,float rate)
+void rst::rasterizer::set_pixel(const Vector3f &point, const Eigen::Vector3f &color)
 {
     //old index: auto ind = point.y() + point.x() * width;
-    auto ind = (height-1-point.y())*width + point.x();
-    frame_buf[ind] = color * rate;
-
+    int ind = (height-point.y())*width + point.x();
+    frame_buf[ind] = color;
 }
 
 // clang-format on
