@@ -23,9 +23,11 @@ Triangle::Triangle() {
 void Triangle::setVertex(int ind, Vector4f ver){
     v[ind] = ver;
 }
+
 void Triangle::setNormal(int ind, Vector3f n){
     normal[ind] = n;
 }
+
 void Triangle::setColor(int ind, float r, float g, float b) {
     if((r<0.0) || (r>255.) ||
        (g<0.0) || (g>255.) ||

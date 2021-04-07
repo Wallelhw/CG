@@ -293,12 +293,12 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
                 float Z = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
                 float zp = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
                 zp *= Z;
-                auto col = interpolate(alpha,beta,gamma,t.color[0],t.color[1],t.color[2],1/Z);
-                auto nor = interpolate(alpha,beta,gamma,t.normal[0],t.normal[1],t.normal[2],1/Z);
-                auto tc = interpolate(alpha,beta,gamma,t.tex_coords[0],t.tex_coords[1],t.tex_coords[2],1/Z);
-                auto sc = interpolate(alpha,beta,gamma,view_pos[0],view_pos[1],view_pos[2],1/Z);
+                auto col = interpolate(alpha,beta,gamma,t.color[0],t.color[1],t.color[2],1);
+                auto nor = interpolate(alpha,beta,gamma,t.normal[0],t.normal[1],t.normal[2],1).normalized();
+                auto tc = interpolate(alpha,beta,gamma,t.tex_coords[0],t.tex_coords[1],t.tex_coords[2],1);
+                auto sc = interpolate(alpha,beta,gamma,view_pos[0],view_pos[1],view_pos[2],1);
 
-                auto payload = fragment_shader_payload(col,nor,tc,t.tex);
+                auto payload = fragment_shader_payload(col,nor,tc,texture ? &*texture : nullptr);
                 payload.view_pos = sc;
                 Eigen::Vector3f pixel_color = fragment_shader(payload);
 
