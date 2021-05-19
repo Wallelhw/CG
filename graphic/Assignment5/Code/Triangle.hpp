@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vector.hpp"
 #include "Object.hpp"
 
 #include <cstring>
@@ -11,7 +12,28 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f
     // that's specified bt v0, v1 and v2 intersects with the ray (whose
     // origin is *orig* and direction is *dir*)
     // Also don't forget to update tnear, u and v.
-    return false;
+
+    // Vector3f E1 = v1 - v0;
+    // Vector3f E2 = v2 - v0;
+    // Vector3f S = orig - v0;
+    // Vector3f S1 = crossProduct(dir, E2);           
+    // Vector3f S2 = crossProduct(S, E1);
+    // float S1E1 = dotProduct(S1, E1);
+    // tnear = 1.0f / S1E1 * dotProduct(S2, E2);
+    // u = 1.0f / S1E1 * dotProduct(S1, S);
+    // v = 1.0f / S1E1 * dotProduct(S2, dir);
+
+    Vector3f S = orig - v2;
+    Vector3f E1 = v0 - v2;
+    Vector3f E2 = v1 - v2;
+    Vector3f D = -dir;
+
+    float temp = dotProduct(E1 , crossProduct(E2,D));
+    u = temp / dotProduct(S , crossProduct(E2,D));
+    v = temp / dotProduct(E1 , crossProduct(S,D));
+    tnear = temp /dotProduct(E1 , crossProduct(E2,S));
+
+    return tnear > 0 && v >= 0 && v <= 1 && u >= 0 && u <= 1 && (u+v) < 1;
 }
 
 class MeshTriangle : public Object
