@@ -12,6 +12,7 @@ struct hit_payload
     Object* hit_obj;
 };
 
+
 class Renderer
 {
 public:
