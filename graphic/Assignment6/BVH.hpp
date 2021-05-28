@@ -29,7 +29,7 @@ public:
     int obj_num=0;
 
     // BVHAccel Public Methods
-    BVHAccel(std::vector<Object*> p, int maxPrimsInNode = 1, SplitMethod splitMethod = SplitMethod::NAIVE);
+    BVHAccel(std::vector<Object*> p, int maxPrimsInNode = 1, SplitMethod splitMethod = SplitMethod::SAH);
     Bounds3 WorldBound() const;
     ~BVHAccel();
 
@@ -39,7 +39,8 @@ public:
     BVHBuildNode* root;
 
     // BVHAccel Private Methods
-    BVHBuildNode* recursiveBuild(std::vector<Object*>objects);
+    BVHBuildNode* recursiveBuild_EqualCount(std::vector<Object*>objects);
+    BVHBuildNode* recursiveBuild_SAH(std::vector<Object*>objects);
 
     // BVHAccel Private Data
     const int maxPrimsInNode;
