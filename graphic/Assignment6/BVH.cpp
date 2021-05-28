@@ -8,21 +8,21 @@ BVHAccel::BVHAccel(std::vector<Object*> p, int maxPrimsInNode,
       primitives(std::move(p))
 {
     time_t start, stop;
-    time(&start);
+    time(&stop);
     if (primitives.empty())
         return;
 
     root = recursiveBuild(primitives);
 
-    time(&stop);
-    double diff = difftime(stop, start);
+    time(&start);
+    double diff = difftime(start, stop);
     int hrs = (int)diff / 3600;
     int mins = ((int)diff / 60) - (hrs * 60);
     int secs = (int)diff - (hrs * 3600) - (mins * 60);
 
     printf(
-        "\rBVH Generation complete: \nTime Taken: %i hrs, %i mins, %i secs\n\n",
-        hrs, mins, secs);
+        "\rBVH Generation complete: \nTime Taken: %i hrs, %i mins, %i secs\nobj_num: %i \n",
+        hrs, mins, secs,this->obj_num);
 }
 
 BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
@@ -39,6 +39,7 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
         node->object = objects[0];
         node->left = nullptr;
         node->right = nullptr;
+        this->obj_num++;
         return node;
     }
     else if (objects.size() == 2) {
@@ -105,5 +106,14 @@ Intersection BVHAccel::Intersect(const Ray& ray) const
 Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 {
     // TODO Traverse the BVH to find intersection
-
+    Intersection ins;
+    if(!node->bounds.IntersectP(ray,ray.direction_inv,ray.DirIsNeg)) return ins;
+    if(node->object)
+    {
+        ins = node->object->getIntersection(ray);
+        return ins;
+    }
+    auto hit1 = BVHAccel::getIntersection(node->left,ray);
+    auto hit2 = BVHAccel::getIntersection(node->right,ray);
+    return hit1.distance<hit2.distance?hit1:hit2;
 }

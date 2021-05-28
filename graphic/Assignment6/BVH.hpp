@@ -26,6 +26,7 @@ class BVHAccel {
 public:
     // BVHAccel Public Types
     enum class SplitMethod { NAIVE, SAH };
+    int obj_num=0;
 
     // BVHAccel Public Methods
     BVHAccel(std::vector<Object*> p, int maxPrimsInNode = 1, SplitMethod splitMethod = SplitMethod::NAIVE);

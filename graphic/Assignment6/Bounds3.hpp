@@ -8,6 +8,7 @@
 #include "Vector.hpp"
 #include <limits>
 #include <array>
+#include <algorithm>
 
 class Bounds3
 {
@@ -96,7 +97,27 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     // invDir: ray direction(x,y,z), invDir=(1.0/x,1.0/y,1.0/z), use this because Multiply is faster that Division
     // dirIsNeg: ray direction(x,y,z), dirIsNeg=[int(x>0),int(y>0),int(z>0)], use this to simplify your logic
     // TODO test if ray bound intersects
+    
+    float xdir[2],ydir[2],zdir[2];
+    xdir[0] = (this->pMin.x - ray.origin.x) * invDir.x;
+    xdir[1] = (this->pMax.x - ray.origin.x) * invDir.x;
+    ydir[0] = (this->pMin.y - ray.origin.y) * invDir.y;
+    ydir[1] = (this->pMax.y - ray.origin.y) * invDir.y; 
+    zdir[0] = (this->pMin.z - ray.origin.z) * invDir.z;
+    zdir[1] = (this->pMax.z - ray.origin.z) * invDir.z; 
 
+    float t_enter[3],t_exit[3];
+    t_enter[0] = dirIsNeg[0] ? xdir[0] : xdir[1];
+    t_enter[1] = dirIsNeg[1] ? ydir[0] : ydir[1];
+    t_enter[2] = dirIsNeg[2] ? zdir[0] : zdir[1];
+    t_exit[0] = dirIsNeg[0] ? xdir[1] : xdir[0];
+    t_exit[1] = dirIsNeg[1] ? ydir[1] : ydir[0];
+    t_exit[2] = dirIsNeg[2] ? zdir[1] : zdir[0];
+
+    float enter_time = std::max(t_enter[0] , std::max(t_enter[1] , t_enter[2]));
+    float exit_time = std::min(t_exit[0] , std::min(t_exit[1] , t_exit[2]));
+
+    return exit_time>0 && enter_time<exit_time;
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)
