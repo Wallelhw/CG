@@ -223,8 +223,8 @@ void Renderer::Render(const Scene& scene)
         for (int i = 0; i < scene.width; ++i)
         {
             // generate primary ray direction
-            float x = i + 0.5f - scene.width / 2;
-            float y = scene.height / 2 - j - 0.5f;
+            float x = (i + 0.5f - scene.width / 2);
+            float y = (scene.height / 2 - j - 0.5f);
             float z = -scene.height / 2;
 
             // TODO: Find the x and y positions of the current pixel to get the direction
