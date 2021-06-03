@@ -3,8 +3,10 @@
 #include<eigen3/Eigen/Dense>
 #include<iostream>
 
-int main(){
+#include<vector>
 
+
+int main(){
     // Basic Example of cpp
     std::cout << "Example of cpp \n";
     float a = 1.0, b = 2.0;

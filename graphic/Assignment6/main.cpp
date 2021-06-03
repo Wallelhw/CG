@@ -1,8 +1,9 @@
+#include "global.hpp"
 #include "Renderer.hpp"
 #include "Scene.hpp"
 #include "Triangle.hpp"
 #include "Vector.hpp"
-#include "global.hpp"
+
 #include <chrono>
 
 // In the main function of the program, we create the scene (create objects and
@@ -17,6 +18,7 @@ int main(int argc, char** argv)
 
     scene.Add(&bunny);
     scene.Add(std::make_unique<Light>(Vector3f(-20, 70, 20), 1));
+    
     scene.Add(std::make_unique<Light>(Vector3f(20, 70, 20), 1));
     scene.buildBVH();
 
