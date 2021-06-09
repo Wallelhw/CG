@@ -253,6 +253,11 @@ inline Intersection Triangle::getIntersection(Ray ray)
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
     // TODO find ray triangle intersection
+
+    if(t_tmp < 0){
+        return inter;
+    }
+
     inter.happened=true;
     inter.coords = Vector3f(ray.origin + t_tmp * ray.direction); 
     inter.normal = this->normal;
