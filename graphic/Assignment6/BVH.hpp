@@ -29,7 +29,7 @@ public:
     int obj_num=0;
 
     // BVHAccel Public Methods
-    BVHAccel(std::vector<Object*> p, int maxPrimsInNode = 1, SplitMethod splitMethod = SplitMethod::SAH);
+    BVHAccel(std::vector<Object*> p, int maxPrimsInNode = 1, SplitMethod splitMethod = SplitMethod::NAIVE);
     Bounds3 WorldBound() const;
     ~BVHAccel();
 

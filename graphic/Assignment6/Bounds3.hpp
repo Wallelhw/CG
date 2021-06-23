@@ -117,7 +117,7 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     float enter_time = std::max(t_enter[0] , std::max(t_enter[1] , t_enter[2]));
     float exit_time = std::min(t_exit[0] , std::min(t_exit[1] , t_exit[2]));
 
-    return exit_time>0 && enter_time<exit_time;
+    return exit_time>=0 && enter_time<=exit_time;
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)

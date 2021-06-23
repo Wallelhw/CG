@@ -7,12 +7,8 @@
 #IncludeRegexTransform: 
 
 /home/cs18/Desktop/Re/CG/graphic/Assignment0/main.cpp
-cmath
--
-eigen3/Eigen/Core
--
-eigen3/Eigen/Dense
--
 iostream
+-
+thread
 -
 

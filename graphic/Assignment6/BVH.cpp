@@ -38,7 +38,7 @@ BVHAccel::BVHAccel(std::vector<Object*> p, int maxPrimsInNode,
 
 BVHBuildNode* BVHAccel::recursiveBuild_EqualCount(std::vector<Object*> objects)
 {
-    //std::cout<<"recursiveBuild_EqualCount"<<std::endl;
+    std::cout<<"recursiveBuild_EqualCount"<<std::endl;
     BVHBuildNode* node = new BVHBuildNode();
 
     // Compute bounds of all primitives in BVH node
@@ -111,7 +111,7 @@ BVHBuildNode* BVHAccel::recursiveBuild_EqualCount(std::vector<Object*> objects)
 BVHBuildNode* BVHAccel::recursiveBuild_SAH(std::vector<Object*> objects)
 {
     
-    //std::cout<<"recursiveBuild_SAH"<<std::endl;
+    std::cout<<"recursiveBuild_SAH"<<std::endl;
 
     BVHBuildNode* node = new BVHBuildNode();
 
