@@ -8,7 +8,8 @@ project ("HWRayTracer")
 
 # Source
 set ( COMMON_ALL
-  src/common/vec3.h
+  src/common/vec3.h 
+  src/common/ppm.h 
 )
 
 set ( HWRAYTRACER

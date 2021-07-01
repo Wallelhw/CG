@@ -3,6 +3,7 @@
 #include <iostream>
 #include "HWRayTracer.h"
 #include "vec3.h"
+#include "ppm.h"
 
 using namespace std;
 
@@ -15,32 +16,14 @@ int main()
 
     // Render
 
-    vec3 test_v0 = vec3(0, 0, 1);
+    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-    vec3 test_v1 = vec3(1, 0, 0);
-    
-    double d = 1.2344;
-
-    cout << cross(test_v0,test_v1);
-
-
-    //std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-    //for (int j = image_height - 1; j >= 0; --j) {
-    //    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-    //    for (int i = 0; i < image_width; ++i) {
-    //        auto r = double(i) / (image_width - 1);
-    //        auto g = double(j) / (image_height - 1); 
-    //        auto b = 0.25;
-
-    //        int ir = static_cast<int>(255.999 * r);
-    //        int ig = static_cast<int>(255.999 * g);
-    //        int ib = static_cast<int>(255.999 * b);
-
-    //        std::cout << ir << ' ' << ig << ' ' << ib << '\n';
-    //    }
-    //}
-    //
-    //std::cerr << "\nDone.\n" ;
-
+    for (int j = image_height - 1; j >= 0; --j) {
+        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+        for (int i = 0; i < image_width; ++i) {
+            color pixel_color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0.25);
+            write_color(std::cout, pixel_color);
+        }
+    }
+    std::cerr << "\nDone.\n";
 }

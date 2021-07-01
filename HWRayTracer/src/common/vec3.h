@@ -58,7 +58,6 @@ public:
 using point3 = vec3;
 using color = vec3;
 
-
 //Vector3 Utility Functions
 
 inline std::ostream& operator <<(std::ostream& os, const vec3& v) {
