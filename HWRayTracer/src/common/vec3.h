@@ -10,7 +10,7 @@ using std::sqrt;
 
 
 //define Vecter3D
-class vec3{
+struct vec3{
 public:
 	double e[3];
 
@@ -46,12 +46,20 @@ public:
 		return *this *= 1 / t;
 	}
 
-	double length_squared() const {
+	double norm_squared() const {
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
 
-	double length() const {
-		return sqrt(length_squared());
+	double norm() const {
+		return sqrt(norm_squared());
+	}
+	
+	vec3& normalize() {
+		double n = norm();
+		e[0] /= n;
+		e[1] /= n;
+		e[2] /= n;
+		return *this;
 	}
 };
 
@@ -65,11 +73,11 @@ inline std::ostream& operator <<(std::ostream& os, const vec3& v) {
 }
 
 inline vec3 operator+ (const vec3& v0, const vec3& v1) {
-	return vec3(v0.e[0] + v1[0], v0.e[1] + v1.e[1], v0.e[2] + v0.e[3]);
+	return vec3(v0.e[0] + v1[0], v0.e[1] + v1.e[1], v0.e[2] + v1.e[2]);
 }
 
 inline vec3 operator- (const vec3& v0, const vec3& v1) {
-	return vec3(v0.e[0] - v1[0], v0.e[1] - v1.e[1], v0.e[2] - v0.e[3]);
+	return vec3(v0.e[0] - v1[0], v0.e[1] - v1.e[1], v0.e[2] - v1.e[2]);
 }
 
 inline vec3 operator*(const double& d, const vec3& v0) {
@@ -91,4 +99,5 @@ inline double dot(const vec3& v0,const vec3& v1) {
 inline vec3 cross(const vec3& v0, const vec3& v1) {
 	return vec3(v0.e[1] * v1.e[2] - v1.e[1] * v0.e[2], v0.e[2] * v1.e[0] - v0.e[0] * v1.e[2], v0.e[0] * v1.e[1] - v1.e[0] * v0.e[1]);
 }
+
 #endif
