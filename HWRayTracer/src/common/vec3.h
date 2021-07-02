@@ -73,11 +73,11 @@ inline std::ostream& operator <<(std::ostream& os, const vec3& v) {
 }
 
 inline vec3 operator+ (const vec3& v0, const vec3& v1) {
-	return vec3(v0.e[0] + v1[0], v0.e[1] + v1.e[1], v0.e[2] + v1.e[2]);
+	return vec3(v0.e[0] + v1.e[0], v0.e[1] + v1.e[1], v0.e[2] + v1.e[2]);
 }
 
 inline vec3 operator- (const vec3& v0, const vec3& v1) {
-	return vec3(v0.e[0] - v1[0], v0.e[1] - v1.e[1], v0.e[2] - v1.e[2]);
+	return vec3(v0.e[0] - v1.e[0], v0.e[1] - v1.e[1], v0.e[2] - v1.e[2]);
 }
 
 inline vec3 operator*(const double& d, const vec3& v0) {

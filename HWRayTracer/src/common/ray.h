@@ -11,7 +11,7 @@ public:
 
 public:
 	ray() {}
-	ray(const vec3& o, const vec3& d) :orig(o), dir(d), time( 0) {}
+	//ray(const vec3& o, const vec3& d) :orig(o), dir(d), time(0) {}
 	ray(const vec3& o, const vec3& d, const double t = 0.0) :orig(o), dir(d), time( t ) {}
 
 	point3 at() {
