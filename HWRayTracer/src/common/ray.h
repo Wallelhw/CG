@@ -18,6 +18,10 @@ public:
 		return orig + time * dir;
 	}
 
+	point3 at(double t) {
+		return orig + t * dir;
+	}
+
 	vec3 direction() const {
 		return dir;
 	}
@@ -26,5 +30,6 @@ public:
 		return orig;
 	}
 };
+
 
 #endif 

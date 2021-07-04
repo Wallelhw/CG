@@ -8,16 +8,40 @@
 
 using namespace std;
 
-color ray_color(const ray& r) {  //add backgroud color
+
+
+double hit_sphere(point3 center, double radius, const ray& r) {
+	auto distance = r.origin() - center;
+	auto a = dot(r.direction(), r.direction());
+	auto b = dot(2 * r.direction(), distance);
+	auto c = dot(distance, distance) - radius*radius;
+	auto discriminant = b * b - 4 * a * c > -0.000001;
+	return discriminant > 0.0 ? ((-b-sqrt(discriminant))/(2.0*a)): -1.0;
+}
+
+color ray_color( ray& r) {  
 	auto t = 0.5 * r.direction().y() + 0.5;
-	return color(0.52+t*0.43,0.91+t*0.07,1);
+	color res = color(0.52+t*0.43,0.91+t*0.07,1);
+	double t_inter = hit_sphere(point3(0, 0, -1), 0.5, r);
+	if ( t_inter > 0) {
+
+		point3 inter = r.at(t_inter);
+		vec3 normal = inter - point3(0, 0, -1);
+		normal = normal.normalize();
+
+		res = 0.5 * color(1 + normal.x(), 1 + normal.y(), 1 + normal.z());
+	}
+	return res;
 }
 
 int main()
 {
+	//cout << cross(vec3(2, 0, 0), vec3(2, 0, 0));
+	
+	//_____________________________________render part____________________________________________//
 	//Viewport
 	const double aspect_ratio = 16.0 / 9.0;
-	const int focal_length = 1.0;
+	const double focal_length = 1.0;
 
 	auto viewport_height = 2.0;
 	auto viewport_width = aspect_ratio * viewport_height;
@@ -43,4 +67,5 @@ int main()
 	}
 
 	std::cerr << "Done!\n";
+	//___________________________________________________________________________________________________//
 }
