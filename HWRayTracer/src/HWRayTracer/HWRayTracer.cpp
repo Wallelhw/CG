@@ -5,39 +5,27 @@
 #include "vec3.h"
 #include "ppm.h"
 #include "ray.h"
+#include "Sphere.cpp"
 
 using namespace std;
-
-
-
-double hit_sphere(point3 center, double radius, const ray& r) {
-	auto distance = r.origin() - center;
-	auto a = dot(r.direction(), r.direction());
-	auto b = dot(2 * r.direction(), distance);
-	auto c = dot(distance, distance) - radius*radius;
-	auto discriminant = b * b - 4 * a * c > -0.000001;
-	return discriminant > 0.0 ? ((-b-sqrt(discriminant))/(2.0*a)): -1.0;
-}
 
 color ray_color( ray& r) {  
 	auto t = 0.5 * r.direction().y() + 0.5;
 	color res = color(0.52+t*0.43,0.91+t*0.07,1);
-	double t_inter = hit_sphere(point3(0, 0, -1), 0.5, r);
-	if ( t_inter > 0) {
 
-		point3 inter = r.at(t_inter);
-		vec3 normal = inter - point3(0, 0, -1);
-		normal = normal.normalize();
+	Sphere s1 = Sphere(point3(0, 0, -1), 0.5);
+	intersection inter = intersection();
+	s1.hit(r, 0, INFINITY, inter);
 
-		res = 0.5 * color(1 + normal.x(), 1 + normal.y(), 1 + normal.z());
+	if (s1.hit(r, 0, INFINITY, inter)) {
+		res = 0.5 * color(1 + inter.normal.x(), 1 + inter.normal.y(), 1 + inter.normal.z());
 	}
 	return res;
 }
 
 int main()
 {
-	//cout << cross(vec3(2, 0, 0), vec3(2, 0, 0));
-	
+	//
 	//_____________________________________render part____________________________________________//
 	//Viewport
 	const double aspect_ratio = 16.0 / 9.0;
@@ -51,7 +39,7 @@ int main()
 	auto vertical = vec3(0,viewport_height,0);
 	auto lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0,0,focal_length);
 
-	//Image
+	////Image
 	const int image_width = 1920;
 	const int image_height =static_cast<int> (image_width / aspect_ratio);
 
