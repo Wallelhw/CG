@@ -8,6 +8,12 @@ struct intersection
 	point3 p;
 	vec3 normal;
 	double t;
+	bool front_face;
+
+	inline void set_face_normal (const vec3& outward_normal,const ray& r)  {
+		front_face = dot(normal, outward_normal) < 0;
+		normal = front_face ? normal : (-normal);
+	}
 };
 
 class Object {
