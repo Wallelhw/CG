@@ -10,9 +10,9 @@ public:
 	double time;
 
 public:
-	ray() {}
+	ray() {};
 	//ray(const vec3& o, const vec3& d) :orig(o), dir(d), time(0) {}
-	ray(const vec3& o, const vec3& d, const double t = 0.0) :orig(o), dir(d), time( t ) {}
+	ray(const vec3& o, const vec3& d, const double t = 0.0) :orig(o), dir(d), time(t) { dir.normalize(); };
 
 	point3 at() {
 		return orig + time * dir;

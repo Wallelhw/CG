@@ -11,7 +11,7 @@ struct intersection
 	bool front_face;
 
 	inline void set_face_normal (const vec3& outward_normal,const ray& r)  {
-		front_face = dot(normal, outward_normal) < 0;
+		front_face = dot(r.direction(), outward_normal) < 0;
 		normal = front_face ? normal : (-normal);
 	}
 };

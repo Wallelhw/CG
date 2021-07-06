@@ -3,11 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("HWRayTracer")
-
+project (
+"HWRayTracer"
+)
 
 # Source
 set ( COMMON_ALL
+  src/common/global.h 
   src/common/vec3.h 
   src/common/ppm.h
   src/common/ray.h

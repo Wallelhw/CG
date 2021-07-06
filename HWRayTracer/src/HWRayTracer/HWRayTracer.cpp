@@ -1,59 +1,73 @@
 ﻿// HWRayTracer.cpp: 定义应用程序的入口点。
 //
 #include <iostream>
+#include "global.h"
 #include "HWRayTracer.h"
-#include "vec3.h"
-#include "ppm.h"
-#include "ray.h"
+
 #include "Sphere.cpp"
+#include "Sence.cpp"
+#include "Camera.h"
 
 using namespace std;
 
-color ray_color( ray& r) {  
+color ray_color( ray& r,Sence s,int max_depth) {
+	if (max_depth < 1)return color(0.0);
+
+	intersection inter = intersection();
+	if (s.hit(r, 0.001, INFINITY, inter)) {
+		point3 target = inter.p + inter.normal + random_in_unit_sphere();
+		return 0.5 * ray_color(ray(inter.p, target - inter.p), s, max_depth - 1);
+	}
+
 	auto t = 0.5 * r.direction().y() + 0.5;
 	color res = color(0.52+t*0.43,0.91+t*0.07,1);
-
-	Sphere s1 = Sphere(point3(0, 0, -1), 0.5);
-	intersection inter = intersection();
-	s1.hit(r, 0, INFINITY, inter);
-
-	if (s1.hit(r, 0, INFINITY, inter)) {
-		res = 0.5 * color(1 + inter.normal.x(), 1 + inter.normal.y(), 1 + inter.normal.z());
-	}
 	return res;
 }
 
 int main()
 {
-	//
+	//for (int i = 20; i > 0; i--) {
+	//	cout << random_in_unit_sphere().norm() << endl;
+	//}
+	
 	//_____________________________________render part____________________________________________//
-	//Viewport
-	const double aspect_ratio = 16.0 / 9.0;
-	const double focal_length = 1.0;
+	//Sence
+	Sence sence = Sence();
+	Sphere s1 = Sphere(point3(0, 0, -1), 0.5);
+	Sphere s2 = Sphere(point3(1, 0, -1), 0.5);
+	Sphere s3 = Sphere(point3(-1, 0, -1), 0.5);
+	Sphere s0 = Sphere(point3(0, -100.5, -1), 100);
+	sence.add(make_shared<Sphere>(s1));
+	sence.add(make_shared<Sphere>(s2));
+	sence.add(make_shared<Sphere>(s3));
+	sence.add(make_shared<Sphere>(s0));
 
-	auto viewport_height = 2.0;
-	auto viewport_width = aspect_ratio * viewport_height;
+	//Camera
+	Camera camera = Camera();
 
-	auto origin = point3(0, 0, 0);
-	auto horizontal = vec3(viewport_width, 0, 0);
-	auto vertical = vec3(0,viewport_height,0);
-	auto lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0,0,focal_length);
-
-	////Image
-	const int image_width = 1920;
-	const int image_height =static_cast<int> (image_width / aspect_ratio);
+	//Image
+	const double aspect = camera.getaspect();
+	const int image_width = 400;
+	const int image_height =static_cast<int> (image_width / aspect);
+	
+	//Render
+	int antialiasing_sample_nums = 100;
+	int ray_trace_maxdepth = 50;
 
 	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
 	for (int i = image_height; i >= 0;i--) {
 		std::cerr << "\rScanlines remaining: " << image_height - i << ' ' << std::flush;
 		for (int j = 0; j < image_width; j++) {
-			auto pixel_point = lower_left_corner + double(i) / (image_height - 1) * vertical + double(j) / (image_width - 1) * horizontal;
-			ray r = ray(origin, pixel_point - origin);
-			auto pixel_color = ray_color(r);
-			write_color(std::cout,pixel_color);
+			color pixel_color = color(0.0);
+			for (int s = 0; s < antialiasing_sample_nums; s++) {
+				auto u = double(j + random_double()) / double(image_width - 1.0);
+				auto v = double(i - random_double()) / double(image_height);
+				ray r = camera.get_ray(u,v);
+			    pixel_color += ray_color(r, sence,ray_trace_maxdepth);
+			}
+			write_color(std::cout,pixel_color,antialiasing_sample_nums);
 		}
 	}
-
 	std::cerr << "Done!\n";
 	//___________________________________________________________________________________________________//
 }

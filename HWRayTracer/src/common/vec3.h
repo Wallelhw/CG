@@ -10,7 +10,8 @@ using std::sqrt;
 
 
 //define Vecter3D
-struct vec3{
+struct vec3
+{
 public:
 	double e[3];
 
@@ -43,7 +44,7 @@ public:
 	}
 
 	vec3& operator/=(const double t) {
-		return *this *= 1 / t;
+		return *this *= 1.0 / t;
 	}
 
 	double norm_squared() const {
@@ -60,6 +61,14 @@ public:
 		e[1] /= n;
 		e[2] /= n;
 		return *this;
+	}
+
+	inline static vec3 random() {
+		return vec3(random_double(),random_double(),random_double());
+	}
+
+	inline static vec3 random(double min, double max) {
+		return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
 	}
 };
 
@@ -99,5 +108,14 @@ inline double dot(const vec3& v0,const vec3& v1) {
 inline vec3 cross(const vec3& v0, const vec3& v1) {
 	return vec3(v0.e[1] * v1.e[2] - v1.e[1] * v0.e[2], v0.e[2] * v1.e[0] - v0.e[0] * v1.e[2], v0.e[0] * v1.e[1] - v1.e[0] * v0.e[1]);
 }
+
+inline static vec3 random_in_unit_sphere() {
+	while (true) {
+		vec3 temp = vec3::random(-1.0,1.0);
+		if (temp.norm() > 1) continue;
+		return temp;
+	}
+}
+
 
 #endif
