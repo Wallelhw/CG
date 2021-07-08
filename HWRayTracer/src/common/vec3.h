@@ -24,7 +24,7 @@ public:
 	double y() const { return e[1]; }
 	double z() const { return e[2]; }
 
-	vec3 operator-() const { return vec3(-e[0], -e[1], -e[1]); }
+	vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
 
 	double operator[](int i) const { return e[i]; }
 	double& operator[](int i) { return e[i]; }
@@ -101,6 +101,10 @@ inline vec3 operator/(const vec3& v0, const double& d) {
 	return v0 * (1 / d);
 }
 
+inline vec3 array_multiply(const vec3& v0, const vec3& v1) {
+	return vec3(v0.e[0] * v1.e[0], v0.e[1] * v1.e[1], v0.e[2] * v1.e[2]);
+}
+
 inline double dot(const vec3& v0,const vec3& v1) {
 	return v0.e[0] * v1.e[0] + v0.e[1] * v1.e[1] + v0.e[2] * v1.e[2];
 }
@@ -117,5 +121,9 @@ inline static vec3 random_in_unit_sphere() {
 	}
 }
 
+inline static vec3 random_in_unit_hemisphere(vec3& normal) {
+	vec3 res = random_in_unit_sphere();
+	return dot(res, normal) > 0 ? res : (-res);
+}
 
 #endif

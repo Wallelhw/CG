@@ -22,6 +22,7 @@
 	 inter.p = r.at(t);
 	 inter.normal = (inter.p - center)/radius;
 	 inter.set_face_normal(inter.p - center, r);
+	 inter.materail = this->materail;
 
 	 return true;
 }

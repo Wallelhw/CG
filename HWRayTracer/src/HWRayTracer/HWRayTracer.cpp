@@ -7,6 +7,7 @@
 #include "Sphere.cpp"
 #include "Sence.cpp"
 #include "Camera.h"
+#include "Materail.h"
 
 using namespace std;
 
@@ -15,39 +16,49 @@ color ray_color( ray& r,Sence s,int max_depth) {
 
 	intersection inter = intersection();
 	if (s.hit(r, 0.001, INFINITY, inter)) {
-		point3 target = inter.p + inter.normal + random_in_unit_sphere();
-		return 0.5 * ray_color(ray(inter.p, target - inter.p), s, max_depth - 1);
+		ray& incident_ray = ray();
+		color& attenuation = color();
+		if (inter.materail->scatter(r, inter, incident_ray, attenuation)) {
+			return array_multiply(attenuation,ray_color(incident_ray,s,max_depth-1));
+		}
+		return color(0);
 	}
 
 	auto t = 0.5 * r.direction().y() + 0.5;
-	color res = color(0.52+t*0.43,0.91+t*0.07,1);
+	color res = color(0.52 + t * 0.43, 0.91 + t * 0.07, 1);
 	return res;
 }
 
 int main()
 {
 	//for (int i = 20; i > 0; i--) {
-	//	cout << random_in_unit_sphere().norm() << endl;
+	//	auto temp = random_in_unit_hemisphere(vec3(0, 0, 1));
+	//	cout << temp << " " << dot(temp, vec3(0, 0, 1)) << endl;
 	//}
-	
 	//_____________________________________render part____________________________________________//
 	//Sence
 	Sence sence = Sence();
-	Sphere s1 = Sphere(point3(0, 0, -1), 0.5);
-	Sphere s2 = Sphere(point3(1, 0, -1), 0.5);
-	Sphere s3 = Sphere(point3(-1, 0, -1), 0.5);
-	Sphere s0 = Sphere(point3(0, -100.5, -1), 100);
+	auto diffuse0 = Diffuse(color(0.8));
+	auto diffuse1 = Diffuse(color(0.5));
+	auto diffuse2 = Diffuse(color(0.2, 0.5, 0.5));
+	auto diffuse3 = Diffuse(color(0.8, 0.5, 0.5));
+
+
+	Sphere s1 = Sphere(point3(0, 0, -1), 0.5,make_shared<Diffuse>(diffuse1));
+	Sphere s2 = Sphere(point3(1, 0, -1), 0.5, make_shared<Diffuse>(diffuse2));
+	Sphere s3 = Sphere(point3(-1, 0, -1), 0.5, make_shared<Diffuse>(diffuse3));
+	Sphere s0 = Sphere(point3(0, -100.5, -1), 100,make_shared<Diffuse>(diffuse0));
 	sence.add(make_shared<Sphere>(s1));
 	sence.add(make_shared<Sphere>(s2));
 	sence.add(make_shared<Sphere>(s3));
 	sence.add(make_shared<Sphere>(s0));
-
+	
 	//Camera
 	Camera camera = Camera();
 
 	//Image
 	const double aspect = camera.getaspect();
-	const int image_width = 400;
+	const int image_width = 1280;
 	const int image_height =static_cast<int> (image_width / aspect);
 	
 	//Render
