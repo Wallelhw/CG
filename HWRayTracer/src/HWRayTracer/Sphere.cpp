@@ -14,7 +14,7 @@
 	 double t = (-half_b - discriminant) / a;
 
 	 if (t<t_min || t>t_max) {
-		 double t = (-half_b + discriminant) / a;
+		 t = (-half_b + discriminant) / a;
 		 if (t<t_min || t>t_max) return false;
 	 }
 

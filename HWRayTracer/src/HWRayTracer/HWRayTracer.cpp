@@ -51,15 +51,15 @@ int main()
 	Sphere s2 = Sphere(point3(2, 0, -0.8), 0.5, make_shared<Diffuse>(diffuse2));
 	Sphere s4 = Sphere(point3(0.8, 0, -1.5), 0.5, make_shared<Metal>(matel1));
 	Sphere s5 = Sphere(point3(-0.7, 0, -1.1), 0.5, make_shared<Metal>(matel2));
-	Sphere s6 = Sphere(point3(0.5, 0.2, -0.8), 0.7, make_shared<Glass>(glass));
+	Sphere s6 = Sphere(point3(0.2, -0.1, -0.6), 0.4, make_shared<Glass>(glass));
 	Sphere s3 = Sphere(point3(-2, 0, -1.2), 0.5, make_shared<Diffuse>(diffuse3));
 	Sphere s0 = Sphere(point3(0, -100.5, -1), 100,make_shared<Diffuse>(diffuse0));
-	//sence.add(make_shared<Sphere>(s1));
-	//sence.add(make_shared<Sphere>(s2));
-	//sence.add(make_shared<Sphere>(s3));
-	//sence.add(make_shared<Sphere>(s4));
+	sence.add(make_shared<Sphere>(s1));
+	sence.add(make_shared<Sphere>(s2));
+	sence.add(make_shared<Sphere>(s3));
+	sence.add(make_shared<Sphere>(s4));
 	sence.add(make_shared<Sphere>(s0));
-	//sence.add(make_shared<Sphere>(s5));
+	sence.add(make_shared<Sphere>(s5));
 	sence.add(make_shared<Sphere>(s6));
 	
 	//Camera
@@ -67,7 +67,7 @@ int main()
 
 	//Image
 	const double aspect = camera.getaspect();
-	const int image_width = 400;
+	const int image_width = 1980;
 	const int image_height =static_cast<int> (image_width / aspect);
 	
 	//Render
@@ -75,7 +75,7 @@ int main()
 	int ray_trace_maxdepth = 50;
 
 	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
-	for (int i = image_height; i >= 0;i--) {
+	for (int i = image_height ; i >= 0;i--) {
 		std::cerr << "\rScanlines remaining: " << i << ' ' << std::flush;
 		for (int j = 0; j < image_width; j++) {
 			color pixel_color = color(0.0);
@@ -90,4 +90,7 @@ int main()
 	}
 	std::cerr << "Done!\n";
 	//___________________________________________________________________________________________________//
+
+
+
 }
