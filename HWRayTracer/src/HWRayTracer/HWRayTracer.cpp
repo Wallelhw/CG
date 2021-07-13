@@ -42,7 +42,7 @@ int main()
 	auto mirror = Mirror(color(0.95));
 	auto diffuse2 = Diffuse(color(0.2, 0.5, 0.5));
 	auto diffuse3 = Diffuse(color(0.8, 0.5, 0.5));
-	auto matel1 = Metal(color(1), 0.3);
+	auto matel1 = Metal(color(1,0.8,1), 0.3);
 	auto matel2 = Metal(color(1,1,0.8), 0.3);
 	auto glass = Glass();
 
