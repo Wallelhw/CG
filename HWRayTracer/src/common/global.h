@@ -11,6 +11,7 @@ const double pi = 3.1415926535897932385;
 inline double degree_to_radian(double degree) {
 	return degree / 180 * pi;
 }//return random double in[0,1)
+
 inline double random_double() {
 	return rand()/ (RAND_MAX+1.0);
 }
@@ -18,6 +19,7 @@ inline double random_double() {
 inline double random_double(double min, double max) {
 	return min + random_double() * (max - min);
 }
+
 inline static vec3 random() {
 	return vec3(random_double(), random_double(), random_double());
 }

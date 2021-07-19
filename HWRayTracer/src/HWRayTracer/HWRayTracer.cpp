@@ -47,7 +47,7 @@ int main()
 	auto glass = Glass();
 
 
-	Sphere s1 = Sphere(point3(0,2, -5), 3,make_shared<Mirror>(mirror));
+	Sphere s1 = Sphere(point3(0,0.5, -5), 1,make_shared<Mirror>(mirror));
 	Sphere s2 = Sphere(point3(2, 0, -0.8), 0.5, make_shared<Diffuse>(diffuse2));
 	Sphere s4 = Sphere(point3(0.8, 0, -1.5), 0.5, make_shared<Metal>(matel1));
 	Sphere s5 = Sphere(point3(-0.7, 0, -1.1), 0.5, make_shared<Metal>(matel2));
@@ -63,7 +63,7 @@ int main()
 	sence.add(make_shared<Sphere>(s6));
 	
 	//Camera
-	Camera camera = Camera(vec3(0,0,1.0));
+	Camera camera = Camera(point3(-2,2,1),point3(0,0,-1));
 
 	//Image
 	const double aspect = camera.getaspect();
