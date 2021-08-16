@@ -1,6 +1,5 @@
 ﻿// HWRayTracer.cpp: 定义应用程序的入口点。
 //
-#include <iostream>
 #include "global.h"
 #include "HWRayTracer.h"
 
@@ -34,13 +33,30 @@ color ray_color( ray& r,Sence s,int max_depth) {
 	color res = color(1);
 	return res;
 }
+vector<string> ppm(2);
 
 int main()
-{
-	//for (int i = 20; i > 0; i--) {
-	//	auto temp = random_in_unit_hemisphere(vec3(0, 0, 1));
-	//	cout << temp << " " << dot(temp, vec3(0, 0, 1)) << endl;
+{	
+	//thread t1(ThreadProc1,10,0);
+	//thread t2(ThreadProc1,20,1);
+
+	//t1.join();
+	//t2.join();
+	//GetSystemInfo(&sysInfo);
+	//string str = "test string";
+	//std::cerr << "max_size:" << str.max_size() << std::endl;
+	//std::cerr << "sys_corenums:" << sysInfo.dwNumberOfProcessors << std::endl;
+	//for each (auto var in ppm)
+	//{
+	//	std::cout << var;
 	//}
+	//system("pause");
+	//return 0;
+
+	for (int i = 20; i > 0; i--) {
+		auto temp = random_in_unit_hemisphere(vec3(0, 0, 1));
+		cout << temp << " " << dot(temp, vec3(0, 0, 1)) << endl;
+	}
 	//_____________________________________render part____________________________________________//
 	//Sence
 	Sence sence = Sence();
@@ -96,7 +112,9 @@ int main()
 	}
 	std::cerr << "Done!\n";
 	//___________________________________________________________________________________________________//
+}
 
-
-
+int RenderThread(int start_height, int image_width, int thread_id)
+{
+	return 0;
 }

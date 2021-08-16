@@ -81,11 +81,6 @@ public:
 		incident_ray = ray(inter.p, incident_ray_direction);
 		attenuation = albedo;
 
-		auto cos_theta = dot(incident_ray.direction(), n);
-		double eval = get_bsdf(incident_ray.direction(), r_out.direction(), n);
-		double pdf = get_pdf(incident_ray.direction(), r_out.direction(), n);
-		//attenuation *= cos_theta * eval * (1 / pdf);
-
 		return true;
 
 	}
