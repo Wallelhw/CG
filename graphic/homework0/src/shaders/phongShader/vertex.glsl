@@ -1,5 +1,6 @@
-attribute vec3 aVertexPosition;
+precision mediump;
 attribute vec3 aNormalPosition;
+attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 
 uniform mat4 uModelViewMatrix;

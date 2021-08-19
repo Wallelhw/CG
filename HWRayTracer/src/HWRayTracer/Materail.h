@@ -134,13 +134,14 @@ public:
 		incident_ray = ray(inter.p, incident_ray_target);
 		auto cos_theta = dot(incident_ray.direction(), r_out.direction());
 
-
-		attenuation = vec3(1);
+		double eval = get_bsdf(incident_ray.direction(), r_out.direction(), n);
+		double pdf = get_pdf(incident_ray.direction(), r_out.direction(), n);
+		attenuation = attenuation *= cos_theta * eval * (1 / pdf);
 
 		return true;
 	}
 	virtual double get_pdf(const vec3& wi, const vec3& wo, const vec3& n) const override {
-		return 1 / (2 * pi);
+		return 1;//todo: HG_pdf
 	}
 	virtual double get_bsdf(const vec3& wi, const vec3& wo, const vec3& n)const override {
 		return 1;

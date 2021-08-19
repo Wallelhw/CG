@@ -1,12 +1,7 @@
 ﻿// HWRayTracer.cpp: 定义应用程序的入口点。
 //
-#include "global.h"
-#include "HWRayTracer.h"
 
-#include "Sphere.cpp"
-#include "Sence.cpp"
-#include "Camera.h"
-#include "Materail.h"
+#include "HWRayTracer.h"
 
 using namespace std;
 
@@ -28,38 +23,17 @@ color ray_color( ray& r,Sence s,int max_depth) {
 		return color(0);
 	}
 
-	//auto t = 0.5 * r.direction().y() + 0.5;
-	//color res = color(0.52 + t * 0.43, 0.91 + t * 0.07, 1);
-	color res = color(1);
+	auto t = 0.5 * r.direction().y() + 0.5;
+	color res = color(0.52 + t * 0.43, 0.91 + t * 0.07, 1);
+	//color res = color(1);
 	return res;
 }
-vector<string> ppm(2);
 
 int main()
 {	
-	//thread t1(ThreadProc1,10,0);
-	//thread t2(ThreadProc1,20,1);
-
-	//t1.join();
-	//t2.join();
-	//GetSystemInfo(&sysInfo);
-	//string str = "test string";
-	//std::cerr << "max_size:" << str.max_size() << std::endl;
-	//std::cerr << "sys_corenums:" << sysInfo.dwNumberOfProcessors << std::endl;
-	//for each (auto var in ppm)
-	//{
-	//	std::cout << var;
-	//}
-	//system("pause");
-	//return 0;
-
-	for (int i = 20; i > 0; i--) {
-		auto temp = random_in_unit_hemisphere(vec3(0, 0, 1));
-		cout << temp << " " << dot(temp, vec3(0, 0, 1)) << endl;
-	}
 	//_____________________________________render part____________________________________________//
 	//Sence
-	Sence sence = Sence();
+	sence = Sence();
 	auto diffuse0 = LambertianDiffuse(color(0.8));
 	auto mirror = Mirror(color(0.95));
 	auto diffuse2 = LambertianDiffuse(color(0.2, 0.5, 0.5));
@@ -83,38 +57,69 @@ int main()
 	sence.add(make_shared<Sphere>(s0));
 	sence.add(make_shared<Sphere>(s5));
 	sence.add(make_shared<Sphere>(s6));
-	
+
+	GetSystemInfo(&sysInfo);
+	int cores_num = sysInfo.dwNumberOfProcessors;
 	//Camera
-	Camera camera = Camera(point3(-2,2,1),point3(0,0,-1));
+	 camera = Camera(point3(-2,2,1),point3(0,0,-1));
 
 	//Image
 	const double aspect = camera.getaspect();
-	const int image_width = 400;
-	const int image_height =static_cast<int> (image_width / aspect);
+	image_width = 1980;
+	image_height =static_cast<int> (image_width / aspect);
+	remains_lines = image_height;
 	
 	//Render
-	int antialiasing_sample_nums = 20;
-	int ray_trace_maxdepth = 10;
+	antialiasing_sample_nums = 100;
+	ray_trace_maxdepth = 50;
 
-	std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
-	for (int i = image_height ; i >= 0;i--) {
-		std::cerr << "\rScanlines remaining: " << i << ' ' << std::flush;
+	out_ppm_list = vector<string>(cores_num);
+	vector<thread> thread_list(cores_num);
+	out_ppm_list[0].append("P3\n" + to_string(image_width) + " " + to_string(image_height) + "\n255\n");
+
+	//Show process
+	auto t_log = thread(Showprogress);
+
+	//Mult_thread 
+	int range = ceil((double)image_height / cores_num);
+	for (int i = 0; i < cores_num; i++) {
+		int range_index = cores_num - i;
+		int start_height = (range * range_index) > image_height ? image_height : (range * range_index) - 1;
+		int end_height = range * (range_index - 1);
+		thread_list[i] = thread(RenderThread,start_height,end_height,i);
+	}
+
+	for (auto& t : thread_list) {
+		t.join();
+	}
+
+	for (auto& str : out_ppm_list) {
+		cout << str;
+	}
+}
+
+int RenderThread(int start_height,int end_height, int thread_id)
+{
+	for (int i = start_height; i >= end_height; i--) {
 		for (int j = 0; j < image_width; j++) {
 			color pixel_color = color(0.0);
 			for (int s = 0; s < antialiasing_sample_nums; s++) {
 				auto u = double(j + random_double()) / double(image_width - 1.0);
 				auto v = double(i - random_double()) / double(image_height);
-				ray r = camera.get_ray(u,v);
-			    pixel_color += ray_color(r, sence,ray_trace_maxdepth);
+				ray r = camera.get_ray(u, v);
+				pixel_color += ray_color(r, sence, ray_trace_maxdepth);
 			}
-			write_color(std::cout,pixel_color,antialiasing_sample_nums);
+			string value = write_color(std::cout, pixel_color, antialiasing_sample_nums);
+			out_ppm_list[thread_id].append(value);
 		}
+		remains_lines--;
 	}
-	std::cerr << "Done!\n";
-	//___________________________________________________________________________________________________//
+	return 0;
 }
 
-int RenderThread(int start_height, int image_width, int thread_id)
-{
-	return 0;
+void Showprogress(){
+	while (remains_lines >= 0) {
+		cerr << "\r Total remains_lines is:" << remains_lines << flush;
+		Sleep(500);
+	}
 }
