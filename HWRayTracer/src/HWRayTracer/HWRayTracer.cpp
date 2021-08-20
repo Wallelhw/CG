@@ -9,9 +9,6 @@ color ray_color( ray& r,Sence s,int max_depth) {
 	if (max_depth < 1)return color(0.0);
 
 	intersection inter = intersection();
-	//befor hit scatter event
-	//TODO
-
 
 	if (s.hit(r, 0.001, INFINITY, inter)) {
 		ray& incident_ray = ray();
@@ -42,7 +39,6 @@ int main()
 	auto matel2 = Metal(color(1,1,0.8), 0.3);
 	auto glass = Glass();
 
-
 	Sphere s1 = Sphere(point3(0,0.5, -5), 1,make_shared<Mirror>(mirror));
 	Sphere s2 = Sphere(point3(2, 0, -0.8), 0.5, make_shared<LambertianDiffuse>(diffuse2));
 	Sphere s4 = Sphere(point3(0.8, 0, -1.5), 0.5, make_shared<Metal>(matel1));
@@ -65,7 +61,7 @@ int main()
 
 	//Image
 	const double aspect = camera.getaspect();
-	image_width = 1980;
+	image_width = 400;
 	image_height =static_cast<int> (image_width / aspect);
 	remains_lines = image_height;
 	
@@ -86,16 +82,18 @@ int main()
 		int range_index = cores_num - i;
 		int start_height = (range * range_index) > image_height ? image_height : (range * range_index) - 1;
 		int end_height = range * (range_index - 1);
+		cout << start_height << "  " << end_height << endl;
 		thread_list[i] = thread(RenderThread,start_height,end_height,i);
 	}
 
 	for (auto& t : thread_list) {
 		t.join();
 	}
-
 	for (auto& str : out_ppm_list) {
 		cout << str;
 	}
+
+	system("pause");
 }
 
 int RenderThread(int start_height,int end_height, int thread_id)
@@ -119,7 +117,7 @@ int RenderThread(int start_height,int end_height, int thread_id)
 
 void Showprogress(){
 	while (remains_lines >= 0) {
-		cerr << "\r Total remains_lines is:" << remains_lines << flush;
+		cerr << "\n Total remains_lines is:" << remains_lines << flush;
 		Sleep(500);
 	}
 }
