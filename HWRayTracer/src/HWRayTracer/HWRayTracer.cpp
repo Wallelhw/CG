@@ -75,7 +75,6 @@ int main()
 
 	//Show process
 	auto t_log = thread(Showprogress);
-
 	//Mult_thread 
 	int range = ceil((double)image_height / cores_num);
 	for (int i = 0; i < cores_num; i++) {
@@ -85,7 +84,7 @@ int main()
 		cout << start_height << "  " << end_height << endl;
 		thread_list[i] = thread(RenderThread,start_height,end_height,i);
 	}
-
+	t_log.join();
 	for (auto& t : thread_list) {
 		t.join();
 	}
