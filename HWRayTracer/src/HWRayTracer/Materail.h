@@ -122,26 +122,30 @@ public:
 
 class HG_materail : public Materail {
 public:
-	double attenuation;
+	double alpha;
 	double HG_g;
-
+	double sigma;
 public:
-	HG_materail(double _attenuation = 1., double _HG_g = 0.5) :attenuation(_attenuation), HG_g(_HG_g) {};
+	HG_materail(double _alpha = 1, double _HG_g = 0.5,double _sigma = 724.0) :alpha(_alpha), HG_g(_HG_g),sigma(_sigma) {};
 
 	virtual bool scatter(const ray& r_out, const intersection& inter, ray& incident_ray, color& attenuation) const override {
 		vec3 n = inter.normal;
 		point3 incident_ray_target = random_in_unit_sphere();
 		incident_ray = ray(inter.p, incident_ray_target);
-		auto cos_theta = dot(incident_ray.direction(), r_out.direction());
-
+		//auto cos_theta = dot(incident_ray.direction(), n);
 		double eval = get_bsdf(incident_ray.direction(), r_out.direction(), n);
 		double pdf = get_pdf(incident_ray.direction(), r_out.direction(), n);
-		attenuation = attenuation *= cos_theta * eval * (1 / pdf);
+		double mpf = 1/ sigma * (1-dot(r_out.direction(),incident_ray.direction()));
+		auto path = (inter.p - r_out.origin()).norm();
+		auto temp = inter.out_face ? 1 : mpf * path;
+		attenuation = this->alpha * temp * eval *  pdf;
 
 		return true;
 	}
 	virtual double get_pdf(const vec3& wi, const vec3& wo, const vec3& n) const override {
-		return 1;//todo: HG_pdf
+
+		double g = 0.5;
+		return (1 / (4 * pi)) * ((1 - pow(g, 2)) / pow(1 + pow(g, 2) - 2 * g * dot(wi, wo), 3 / 2));
 	}
 	virtual double get_bsdf(const vec3& wi, const vec3& wo, const vec3& n)const override {
 		return 1;

@@ -38,12 +38,14 @@ int main()
 	auto matel1 = Metal(color(1,0.8,1), 0.3);
 	auto matel2 = Metal(color(1,1,0.8), 0.3);
 	auto glass = Glass();
+	auto HG = HG_materail();
 
 	Sphere s1 = Sphere(point3(0,0.5, -5), 1,make_shared<Mirror>(mirror));
 	Sphere s2 = Sphere(point3(2, 0, -0.8), 0.5, make_shared<LambertianDiffuse>(diffuse2));
 	Sphere s4 = Sphere(point3(0.8, 0, -1.5), 0.5, make_shared<Metal>(matel1));
 	Sphere s5 = Sphere(point3(-0.7, 0, -1.1), 0.5, make_shared<Metal>(matel2));
 	Sphere s6 = Sphere(point3(0.2, -0.1, -0.6), 0.4, make_shared<Glass>(glass));
+	Sphere s7 = Sphere(point3(3.2, 0.7, -1.6), 1, make_shared<HG_materail>(HG));
 	Sphere s3 = Sphere(point3(-2, 0, -1.2), 0.5, make_shared<LambertianDiffuse>(diffuse3));
 	Sphere s0 = Sphere(point3(0, -100.5, -1), 100,make_shared<LambertianDiffuse>(diffuse0));
 	sence.add(make_shared<Sphere>(s1));
@@ -53,6 +55,7 @@ int main()
 	sence.add(make_shared<Sphere>(s0));
 	sence.add(make_shared<Sphere>(s5));
 	sence.add(make_shared<Sphere>(s6));
+	sence.add(make_shared<Sphere>(s7));
 
 	GetSystemInfo(&sysInfo);
 	int cores_num = sysInfo.dwNumberOfProcessors;
@@ -81,18 +84,18 @@ int main()
 		int range_index = cores_num - i;
 		int start_height = (range * range_index) > image_height ? image_height : (range * range_index) - 1;
 		int end_height = range * (range_index - 1);
-		cout << start_height << "  " << end_height << endl;
+		//cerr << start_height << "  " << end_height << endl;
 		thread_list[i] = thread(RenderThread,start_height,end_height,i);
 	}
 	t_log.join();
+
 	for (auto& t : thread_list) {
 		t.join();
 	}
 	for (auto& str : out_ppm_list) {
 		cout << str;
 	}
-
-	system("pause");
+	cerr << "\nEnd The Rending" << endl;
 }
 
 int RenderThread(int start_height,int end_height, int thread_id)
