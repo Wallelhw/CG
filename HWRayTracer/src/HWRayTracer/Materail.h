@@ -130,15 +130,16 @@ public:
 
 	virtual bool scatter(const ray& r_out, const intersection& inter, ray& incident_ray, color& attenuation) const override {
 		vec3 n = inter.normal;
-		point3 incident_ray_target = random_in_unit_sphere();
-		incident_ray = ray(inter.p, incident_ray_target);
-		//auto cos_theta = dot(incident_ray.direction(), n);
+		double pdf = 0;
+		while (random_double(0., 1.) > pdf) {
+			point3 incident_ray_target = random_in_unit_sphere();
+			incident_ray = ray(inter.p, incident_ray_target);
+		    pdf = get_pdf(incident_ray.direction(), r_out.direction(), n);
+		}
 		double eval = get_bsdf(incident_ray.direction(), r_out.direction(), n);
-		double pdf = get_pdf(incident_ray.direction(), r_out.direction(), n);
-		double mpf = 1/ sigma * (1-dot(r_out.direction(),incident_ray.direction()));
-		auto path = (inter.p - r_out.origin()).norm();
-		auto temp = inter.out_face ? 1 : mpf * path;
-		attenuation = this->alpha * temp * eval *  pdf;
+		auto d = (inter.p - r_out.origin()).norm();
+		auto tr = inter.out_face ? 1 : exp(-sigma * d);
+		attenuation = this->alpha * tr * eval *  (1/pdf);
 
 		return true;
 	}
@@ -150,5 +151,6 @@ public:
 	virtual double get_bsdf(const vec3& wi, const vec3& wo, const vec3& n)const override {
 		return 1;
 	}
+
 };
 #endif // !MATERIAL
