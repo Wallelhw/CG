@@ -20,12 +20,20 @@ class DirectionalLight {
         let modelMatrix = mat4.create();
         let viewMatrix = mat4.create();
         let projectionMatrix = mat4.create();
+        let left = -100;
+        let right = 100;
+        let bottom = -100;
+        let top = 100;
+        let near = 0.1;
+        let far = 1000;
 
         // Model transform
-
+        mat4.multiply(modelMatrix,modelMatrix,scale);
+        mat4.multiply(modelMatrix,modelMatrix,translate);
         // View transform
-    
+        mat4.lookAt(viewMatrix,this.lightPos,this.focalPoint,this.lightUp);
         // Projection transform
+        mat4.ortho(projectionMatrix,left,right,bottom,top,near,far);
 
         mat4.multiply(lightMVP, projectionMatrix, viewMatrix);
         mat4.multiply(lightMVP, lightMVP, modelMatrix);
