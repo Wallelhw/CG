@@ -27,9 +27,10 @@ class DirectionalLight {
         let near = 0.1;
         let far = 1000;
 
-        // Model transform
-        mat4.multiply(modelMatrix,modelMatrix,scale);
-        mat4.multiply(modelMatrix,modelMatrix,translate);
+        // Model transform      
+        mat4.scale(modelMatrix,modelMatrix,scale);
+        mat4.translate(modelMatrix,modelMatrix,translate);
+
         // View transform
         mat4.lookAt(viewMatrix,this.lightPos,this.focalPoint,this.lightUp);
         // Projection transform
@@ -38,6 +39,7 @@ class DirectionalLight {
         mat4.multiply(lightMVP, projectionMatrix, viewMatrix);
         mat4.multiply(lightMVP, lightMVP, modelMatrix);
 
+        console.log(lightMVP);
         return lightMVP;
     }
 }
