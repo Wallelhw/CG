@@ -136,7 +136,7 @@ void main(void) {
 
   float visibility;
   vec3 shadowCoord = vPositionFromLight.xyz / vPositionFromLight.w;
-  shadowCoord = shadowCoord*0.5+vec3(0.5,0.5,0.5);
+  shadowCoord = shadowCoord*0.5+vec3(0.5);
   visibility = useShadowMap(uShadowMap, vec4(shadowCoord, 1.0));
   //visibility = PCF(uShadowMap, vec4(shadowCoord, 1.0));
   //visibility = PCSS(uShadowMap, vec4(shadowCoord, 1.0));

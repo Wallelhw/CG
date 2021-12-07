@@ -27,9 +27,9 @@ class DirectionalLight {
         let near = 0.1;
         let far = 1000;
 
-        // Model transform      
-        mat4.scale(modelMatrix,modelMatrix,scale);
+        // Model transform
         mat4.translate(modelMatrix,modelMatrix,translate);
+        mat4.scale(modelMatrix,modelMatrix,scale);
 
         // View transform
         mat4.lookAt(viewMatrix,this.lightPos,this.focalPoint,this.lightUp);
