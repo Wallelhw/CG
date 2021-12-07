@@ -31,6 +31,9 @@ class WebGLRenderer {
         for (let l = 0; l < this.lights.length; l++) {
             // Draw light
             // TODO: Support all kinds of transform
+            //const timer = Date.now() * 0.00025;
+            //this.lights[l].entity.lightPos = [Math.sin(timer * 6) * 100,Math.cos(timer * 4) * 150,Math.cos(timer * 2) * 100];
+         
             this.lights[l].meshRender.mesh.transform.translate = this.lights[l].entity.lightPos;
             this.lights[l].meshRender.draw(this.camera);
 

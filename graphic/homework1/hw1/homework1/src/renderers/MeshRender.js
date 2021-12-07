@@ -143,10 +143,9 @@ class MeshRender {
 
 	bindMaterialParameters() {
 		const gl = this.gl;
-
 		let textureNum = 0;
+		
 		for (let k in this.material.uniforms) {
-
 			if (this.material.uniforms[k].type == 'matrix4fv') {
 				gl.uniformMatrix4fv(
 					this.shader.program.uniforms[k],

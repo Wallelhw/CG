@@ -39,7 +39,7 @@ class DirectionalLight {
         mat4.multiply(lightMVP, projectionMatrix, viewMatrix);
         mat4.multiply(lightMVP, lightMVP, modelMatrix);
 
-        console.log(lightMVP);
+        //console.log(lightMVP);
         return lightMVP;
     }
 }
