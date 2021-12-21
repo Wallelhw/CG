@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.13..3.18)
+cmake_minimum_required (VERSION 3.13..3.22.1)
 project(openexr)
 
 SET (OPENEXR_INSTALL_HEADER_DEST "include/OpenEXR" CACHE STRING "")

@@ -66,7 +66,7 @@ namespace ProjEnv
     float CalcArea(const float &u_, const float &v_, const int &width,
                    const int &height)
     {
-        // transform from [0..res - 1] to [- (1 - 1 / res) .. (1 - 1 / res)]
+        // transform from [0..res - 1] to [- (1 - 1 / res) .. (1 - 1 / res)]   从 0 到 width  转换到  -1到1
         // ( 0.5 is for texel center addressing)
         float u = (2.0 * (u_ + 0.5) / width) - 1.0;
         float v = (2.0 * (v_ + 0.5) / height) - 1.0;
@@ -94,9 +94,9 @@ namespace ProjEnv
                                                     const int &width, const int &height,
                                                     const int &channel)
     {
-        std::vector<Eigen::Vector3f> cubemapDirs;
+        std::vector<Eigen::Vector3f> cubemapDirs;                                                                       //cubemap上每个像素的方向向量
         cubemapDirs.reserve(6 * width * height);
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 6; i++)                                                                                     //计算没有像素中心的方向向量放入上方容器中
         {
             Eigen::Vector3f faceDirX = cubemapFaceDirections[i][0];
             Eigen::Vector3f faceDirY = cubemapFaceDirections[i][1];
@@ -112,11 +112,14 @@ namespace ProjEnv
                 }
             }
         }
-        constexpr int SHNum = (SHOrder + 1) * (SHOrder + 1);
-        std::vector<Eigen::Array3f> SHCoeffiecents(SHNum);
+        constexpr int SHNum = (SHOrder + 1) * (SHOrder + 1);                                                            //l^2   球谐函数基函数的个数；l指球谐函数的阶数
+        std::vector<Eigen::Array3f> SHCoeffiecents(SHNum);                                                              //球谐函数基函数系数容器，cubemap使用3通道故使用array3f
         for (int i = 0; i < SHNum; i++)
             SHCoeffiecents[i] = Eigen::Array3f(0);
+        std::vector<Eigen::Array3f> BaseSHCoeffiecents;
+        BaseSHCoeffiecents.assign(SHNum, Eigen::Array3f(1));
         float sumWeight = 0;
+        float delta_wi = 0.f;
         for (int i = 0; i < 6; i++)
         {
             for (int y = 0; y < height; y++)
@@ -125,10 +128,13 @@ namespace ProjEnv
                 {
                     // TODO: here you need to compute light sh of each face of cubemap of each pixel
                     // TODO: 此处你需要计算每个像素下cubemap某个面的球谐系数
-                    Eigen::Vector3f dir = cubemapDirs[i * width * height + y * width + x];
+                    Eigen::Vector3f dir = cubemapDirs[i * width * height + y * width + x];                              //the piexl's center
                     int index = (y * width + x) * channel;
-                    Eigen::Array3f Le(images[i][index + 0], images[i][index + 1],
-                                      images[i][index + 2]);
+                    Eigen::Array3f Le(images[i][index + 0], images[i][index + 1], images[i][index + 2]);                //this piexl's value
+                    delta_wi = CalcArea(x, y, width, height) / (4.f * M_PI);
+                    Eigen::Array3f sh = sh::EvalSHSum(2, BaseSHCoeffiecents, dir.cast<double>());
+
+                    std::cout << sh << std::endl;
                 }
             }
         }
@@ -218,6 +224,7 @@ public:
                     // TODO: 此处你需要计算给定方向下的shadowed传输项球谐函数值
                     return 0;
                 }
+                return 0;
             };
             auto shCoeff = sh::ProjectFunction(SHOrder, shFunc, m_SampleCount);
             for (int j = 0; j < shCoeff->size(); j++)
