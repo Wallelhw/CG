@@ -49,7 +49,7 @@ namespace ProjEnv
         return images;
     }
 
-    const Eigen::Vector3f cubemapFaceDirections[6][3] = {
+    const Eigen::Vector3d cubemapFaceDirections[6][3] = {
         {{0, 0, 1}, {0, -1, 0}, {-1, 0, 0}},  // negx
         {{0, 0, 1}, {0, -1, 0}, {1, 0, 0}},   // posx
         {{1, 0, 0}, {0, 0, -1}, {0, -1, 0}},  // negy
@@ -94,32 +94,31 @@ namespace ProjEnv
                                                     const int &width, const int &height,
                                                     const int &channel)
     {
-        std::vector<Eigen::Vector3f> cubemapDirs;                                                                       //cubemap上每个像素的方向向量
+        std::vector<Eigen::Vector3d> cubemapDirs;                                                                       //nomal vector of every pixel 's center
         cubemapDirs.reserve(6 * width * height);
-        for (int i = 0; i < 6; i++)                                                                                     //计算没有像素中心的方向向量放入上方容器中
+        for (int i = 0; i < 6; i++)                                                                                     //compute nomal vector
         {
-            Eigen::Vector3f faceDirX = cubemapFaceDirections[i][0];
-            Eigen::Vector3f faceDirY = cubemapFaceDirections[i][1];
-            Eigen::Vector3f faceDirZ = cubemapFaceDirections[i][2];
+            Eigen::Vector3d faceDirX = cubemapFaceDirections[i][0];
+            Eigen::Vector3d faceDirY = cubemapFaceDirections[i][1];
+            Eigen::Vector3d faceDirZ = cubemapFaceDirections[i][2];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float u = 2 * ((x + 0.5) / width) - 1;
-                    float v = 2 * ((y + 0.5) / height) - 1;
-                    Eigen::Vector3f dir = (faceDirX * u + faceDirY * v + faceDirZ).normalized();
+                    double u = 2 * ((x + 0.5) / width) - 1;
+                    double v = 2 * ((y + 0.5) / height) - 1;
+                    Eigen::Vector3d dir = (faceDirX * u + faceDirY * v + faceDirZ).normalized();
                     cubemapDirs.push_back(dir);
                 }
             }
         }
-        constexpr int SHNum = (SHOrder + 1) * (SHOrder + 1);                                                            //l^2   球谐函数基函数的个数；l指球谐函数的阶数
-        std::vector<Eigen::Array3f> SHCoeffiecents(SHNum);                                                              //球谐函数基函数系数容器，cubemap使用3通道故使用array3f
+        constexpr int SHNum = (SHOrder + 1) * (SHOrder + 1);                                                            //counts of SHCoeffiecents in SH base fuction 
+        std::vector<Eigen::Array3f> SHCoeffiecents(SHNum);
         for (int i = 0; i < SHNum; i++)
             SHCoeffiecents[i] = Eigen::Array3f(0);
-        std::vector<Eigen::Array3f> BaseSHCoeffiecents;
-        BaseSHCoeffiecents.assign(SHNum, Eigen::Array3f(1));
         float sumWeight = 0;
         float delta_wi = 0.f;
+        std::cout << "start precompute environment lights..." << std::endl;
         for (int i = 0; i < 6; i++)
         {
             for (int y = 0; y < height; y++)
@@ -128,16 +127,22 @@ namespace ProjEnv
                 {
                     // TODO: here you need to compute light sh of each face of cubemap of each pixel
                     // TODO: 此处你需要计算每个像素下cubemap某个面的球谐系数
-                    Eigen::Vector3f dir = cubemapDirs[i * width * height + y * width + x];                              //the piexl's center
+                    Eigen::Vector3d dir = cubemapDirs[i * width * height + y * width + x];                              //the piexl's center
                     int index = (y * width + x) * channel;
                     Eigen::Array3f Le(images[i][index + 0], images[i][index + 1], images[i][index + 2]);                //this piexl's value
+                    Le = Eigen::Array3f(0.5f);
                     delta_wi = CalcArea(x, y, width, height) / (4.f * M_PI);
-                    Eigen::Array3f sh = sh::EvalSHSum(2, BaseSHCoeffiecents, dir.cast<double>());
-
-                    std::cout << sh << std::endl;
+                    for (int l = 0; l <= SHOrder; l++) {
+                        for (int m = -l; m < l+1; m++) {
+                            int i = sh::GetIndex(l, m);
+                            double sh = sh::EvalSH(l, m, dir);
+                            SHCoeffiecents[i] += (float)sh * delta_wi * Le.array();
+                        }
+                    }
                 }
             }
         }
+        std::cout << "end precompute environment lights..." << std::endl;
         return SHCoeffiecents;
     }
 }
