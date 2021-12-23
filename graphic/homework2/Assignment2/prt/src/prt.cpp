@@ -130,7 +130,7 @@ namespace ProjEnv
                     Eigen::Vector3d dir = cubemapDirs[i * width * height + y * width + x];                              //the piexl's center
                     int index = (y * width + x) * channel;
                     Eigen::Array3f Le(images[i][index + 0], images[i][index + 1], images[i][index + 2]);                //this piexl's value
-                    Le = Eigen::Array3f(0.5f);
+                    //Le = Eigen::Array3f(0.5f);                                                                        //test precompute product
                     delta_wi = CalcArea(x, y, width, height) / (4.f * M_PI);
                     for (int l = 0; l <= SHOrder; l++) {
                         for (int m = -l; m < l+1; m++) {
@@ -220,13 +220,11 @@ public:
                 if (m_Type == Type::Unshadowed)
                 {
                     // TODO: here you need to calculate unshadowed transport term of a given direction
-                    // TODO: 此处你需要计算给定方向下的unshadowed传输项球谐函数值
-                    return 0;
+                    return std::max((double)wi.dot(n),(double)0);;
                 }
                 else
                 {
                     // TODO: here you need to calculate shadowed transport term of a given direction
-                    // TODO: 此处你需要计算给定方向下的shadowed传输项球谐函数值
                     return 0;
                 }
                 return 0;
