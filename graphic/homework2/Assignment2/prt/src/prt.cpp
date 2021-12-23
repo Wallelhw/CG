@@ -212,6 +212,7 @@ public:
         fout << mesh->getVertexCount() << std::endl;
         for (int i = 0; i < mesh->getVertexCount(); i++)
         {
+            std::cout << i << "/" << mesh->getVertexCount() << std::endl;
             const Point3f &v = mesh->getVertexPositions().col(i);
             const Normal3f &n = mesh->getVertexNormals().col(i);
             auto shFunc = [&](double phi, double theta) -> double {
@@ -220,12 +221,14 @@ public:
                 if (m_Type == Type::Unshadowed)
                 {
                     // TODO: here you need to calculate unshadowed transport term of a given direction
-                    return std::max((double)wi.dot(n),(double)0);;
+                    return std::max((double)wi.dot(n),(double)0);
                 }
                 else
                 {
                     // TODO: here you need to calculate shadowed transport term of a given direction
-                    return 0;
+                    nori::Ray3f shadowray = nori::Ray3f(v,wi);
+                    bool isIntersect = scene->rayIntersect(shadowray);
+                    return isIntersect?0: std::max((double)wi.dot(n), (double)0);
                 }
                 return 0;
             };
