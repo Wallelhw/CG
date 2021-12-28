@@ -212,7 +212,7 @@ public:
         fout << mesh->getVertexCount() << std::endl;
         for (int i = 0; i < mesh->getVertexCount(); i++)
         {
-            std::cout << i << "/" << mesh->getVertexCount() << std::endl;
+            std::cout << "directly:" << i << "/" << mesh->getVertexCount() << std::endl;
             const Point3f &v = mesh->getVertexPositions().col(i);
             const Normal3f &n = mesh->getVertexNormals().col(i);
             auto shFunc = [&](double phi, double theta) -> double {
@@ -232,15 +232,47 @@ public:
                 }
                 return 0;
             };
-            auto shCoeff = sh::ProjectFunction(SHOrder, shFunc, m_SampleCount);
+            auto shCoeff = sh::ProjectFunction(SHOrder, shFunc, m_SampleCount); // base fuction's Coeff fit
             for (int j = 0; j < shCoeff->size(); j++)
             {
+
                 m_TransportSHCoeffs.col(i).coeffRef(j) = (*shCoeff)[j];
             }
         }
         if (m_Type == Type::Interreflection)
         {
             // TODO: leave for bonus
+            for (int i = 0; i < mesh->getVertexCount(); i++) {
+                std::cout << "indirectly:" << i << "/" << mesh->getVertexCount() << std::endl;
+                const Point3f& v = mesh->getVertexPositions().col(i);
+                const Normal3f& n = mesh->getVertexNormals().col(i);
+                auto indirectShFuc = [&](double phi, double theta) ->double {
+                    Eigen::Array3d d = sh::ToVector(phi, theta);
+                    const auto wi = Vector3f(d.x(),d.y(),d.z());
+                    nori::Ray3f inray = nori::Ray3f(v, wi);
+                    nori::Intersection its;
+                    if (!scene->rayIntersect(inray, its)) return 0;
+                    //get transport SHCoeffs of 3 vertex of the trangle 
+                    const Eigen::Matrix<Vector3f::Scalar, SHCoeffLength, 1> sh0 = m_TransportSHCoeffs.col(its.tri_index.x()),
+                        sh1 = m_TransportSHCoeffs.col(its.tri_index.y()),
+                        sh2 = m_TransportSHCoeffs.col(its.tri_index.z());
+                    //get light SHCoeffs
+                    const Eigen::Matrix<Vector3f::Scalar, SHCoeffLength, 1> rL = m_LightCoeffs.row(0), gL = m_LightCoeffs.row(1), bL = m_LightCoeffs.row(2);
+                    //get color of 3 vertex of the trangle
+                    Color3f c0 = Color3f(rL.dot(sh0), gL.dot(sh0), bL.dot(sh0)),
+                        c1 = Color3f(rL.dot(sh1), gL.dot(sh1), bL.dot(sh1)),
+                        c2 = Color3f(rL.dot(sh2), gL.dot(sh2), bL.dot(sh2));
+                    //get the intersection color (bary)
+                    const Vector3f& bary = its.bary;
+                    Color3f c = bary.x() * c0 + bary.y() * c1 + bary.z() * c2;
+                    double irradance = (c.r() + c.g() + c.b()) / 3.;
+                    return irradance * std::max((double)wi.dot(n), (double)0);
+                };
+                auto indirectShCoeff = sh::ProjectFunction(SHOrder, indirectShFuc, m_SampleCount);
+                for (int j = 0; j < indirectShCoeff->size(); j++) {
+                    m_TransportSHCoeffs.col(i).coeffRef(j) += (*indirectShCoeff)[j];
+                }
+            }
         }
 
         // Save in face format
