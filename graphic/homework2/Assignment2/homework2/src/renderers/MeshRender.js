@@ -204,7 +204,9 @@ class MeshRender {
 		const buf = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(precomputeLT[guiParams.envmapId]), gl.STATIC_DRAW);
-	
+		
+		console.log(precomputeLT[guiParams.envmapId]);
+		
 		for (var ii = 0; ii < 3; ++ii) {
 			gl.enableVertexAttribArray(this.shader.program.attribs['aPrecomputeLT'] + ii);
 			gl.vertexAttribPointer(this.shader.program.attribs['aPrecomputeLT'] + ii, 3, gl.FLOAT, false, 36, ii * 12);

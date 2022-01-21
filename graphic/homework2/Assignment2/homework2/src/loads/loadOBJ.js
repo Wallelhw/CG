@@ -64,7 +64,7 @@ function loadOBJ(renderer, path, name, objMaterial, transform) {
 									break;
 
 								case 'PRTMaterial':
-									material = 
+									material = buildPRTMaterial(precomputeL[guiParams.envmapId],"./src/shaders/prtShader/prtVertex.glsl","./src/shaders/prtShader/prtFragment.glsl");
 							}
 
 							material.then((data) => {
