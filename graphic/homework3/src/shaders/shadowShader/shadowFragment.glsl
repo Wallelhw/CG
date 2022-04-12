@@ -17,6 +17,6 @@ vec4 EncodeFloatRGBA(float v) {
 }
 
 void main(){
-  gl_FragData[0] = vec4(vec3(gl_FragCoord.z) * 100.0, 1.0);
+  gl_FragData[0] = vec4(vec3(gl_FragCoord.z) * 100.0, 1.0);     //光源到p点的深度，以便后续计算（Shadow map）（放大100倍是为了精度考虑？没有使用四通道8位数法来提高精度）
   // gl_FragData[0] = EncodeFloatRGBA(gl_FragCoord.z * 100.0);
 }
