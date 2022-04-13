@@ -2,7 +2,7 @@
 precision highp float;
 #endif
 
-uniform vec3 uLightDir;
+uniform vec3 uLightDir;     //已经在CalcShadingDirection中取反
 uniform vec3 uCameraPos;
 uniform vec3 uLightRadiance;
 uniform sampler2D uGDiffuse;
@@ -122,7 +122,9 @@ vec3 GetGBufferDiffuse(vec2 uv) {
  *
  */
 vec3 EvalDiffuse(vec3 wi, vec3 wo, vec2 uv) {
-  vec3 L = vec3(0.0);
+  vec3 L = GetGBufferDiffuse(uv);
+  float diff = max(dot(wi,GetGBufferNormalWorld(uv)),0.0);
+  L*=diff;
   return L;
 }
 
@@ -132,8 +134,12 @@ vec3 EvalDiffuse(vec3 wi, vec3 wo, vec2 uv) {
  *
  */
 vec3 EvalDirectionalLight(vec2 uv) {
-  vec3 Le = vec3(0.0);
-  return Le;
+  vec3 Lidir = uLightRadiance;
+  vec3 wi = uLightDir;
+  vec3 wo = normalize(uCameraPos-vPosWorld.xyz);
+  vec3 Lodir = Lidir * EvalDiffuse(wi,wo,uv);
+
+  return Lodir;
 }
 
 bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
@@ -144,9 +150,9 @@ bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
 
 void main() {
   float s = InitRand(gl_FragCoord.xy);
-
-  vec3 L = vec3(0.0);
-  L = GetGBufferDiffuse(GetScreenCoordinate(vPosWorld.xyz));
+  vec2 uv = GetScreenCoordinate(vPosWorld.xyz);
+  vec3 L = EvalDirectionalLight(uv);
+  
   vec3 color = pow(clamp(L, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
   gl_FragColor = vec4(vec3(color.rgb), 1.0);
 }

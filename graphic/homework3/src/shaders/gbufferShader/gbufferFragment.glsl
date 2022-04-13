@@ -40,8 +40,8 @@ vec3 ApplyTangentNormalMap() {
   return nt;
 }
 
-void main(void) {
-  vec3 kd = texture2D(uKd, vTextureCoord).rgb;
+void main(void) {//一下0-4通道返回的贴图均为RSM贴图
+  vec3 kd = texture2D(uKd, vTextureCoord).rgb;                            
   gl_FragData[0] = vec4(kd, 1.0);                                         //diffuse map
   gl_FragData[1] = vec4(vec3(vDepth), 1.0);                               //depth map
   gl_FragData[2] = vec4(ApplyTangentNormalMap(), 1.0);                    //normal map
