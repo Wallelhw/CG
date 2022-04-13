@@ -137,12 +137,15 @@ vec3 EvalDirectionalLight(vec2 uv) {
   vec3 Lidir = uLightRadiance;
   vec3 wi = uLightDir;
   vec3 wo = normalize(uCameraPos-vPosWorld.xyz);
-  vec3 Lodir = Lidir * EvalDiffuse(wi,wo,uv);
+  float v = GetGBufferuShadow(uv);
+  vec3 Lodir = Lidir * EvalDiffuse(wi,wo,uv) * v;
 
   return Lodir;
 }
 
 bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
+
+
   return false;
 }
 
@@ -151,8 +154,8 @@ bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
 void main() {
   float s = InitRand(gl_FragCoord.xy);
   vec2 uv = GetScreenCoordinate(vPosWorld.xyz);
+
   vec3 L = EvalDirectionalLight(uv);
-  
   vec3 color = pow(clamp(L, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
   gl_FragColor = vec4(vec3(color.rgb), 1.0);
 }

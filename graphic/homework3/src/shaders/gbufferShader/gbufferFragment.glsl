@@ -45,6 +45,6 @@ void main(void) {//一下0-4通道返回的贴图均为RSM贴图
   gl_FragData[0] = vec4(kd, 1.0);                                         //diffuse map
   gl_FragData[1] = vec4(vec3(vDepth), 1.0);                               //depth map
   gl_FragData[2] = vec4(ApplyTangentNormalMap(), 1.0);                    //normal map
-  gl_FragData[3] = vec4(vec3(SimpleShadowMap(vPosWorld.xyz, 1e-2)), 1.0); //shadow map
+  gl_FragData[3] = vec4(vec3(SimpleShadowMap(vPosWorld.xyz, 1e-2)), 1.0); //visibility map
   gl_FragData[4] = vec4(vec3(vPosWorld.xyz), 1.0);                        //posworld map
 }
