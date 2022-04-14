@@ -128,6 +128,25 @@ vec3 EvalDiffuse(vec3 wi, vec3 wo, vec2 uv) {
   return L;
 }
 
+vec3 Reflect(vec3 i,vec3 n){
+  return 2.0 * dot(i, n) * n - i;
+}
+
+bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
+  float step= 0.05;
+  vec3 end = vec3(0);
+  for(float i = 0.; i < 200.; i++)
+  {
+    end = ori + i * step * dir;
+    if(GetDepth(end) - 0.1 > GetGBufferDepth(GetScreenCoordinate(end)))
+    {
+      hitPos = end;
+      return true;
+    }
+  }
+  return false;
+}
+
 /*
  * Evaluate directional light with shadow map
  * uv is in screen space, [0, 1] x [0, 1].
@@ -143,19 +162,25 @@ vec3 EvalDirectionalLight(vec2 uv) {
   return Lodir;
 }
 
-bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
-
-
-  return false;
+vec3 EvalReflectionalLight(vec2 uv){
+  vec3 i = normalize(uCameraPos -vPosWorld.xyz);
+  vec3 n = GetGBufferNormalWorld(uv);
+  vec3 o = Reflect(i, n);
+  vec3 hitPos,Lref = vec3 (0.);
+  if(RayMarch(vPosWorld.xyz,o,hitPos)){
+    Lref = EvalDirectionalLight(GetScreenCoordinate(hitPos));
+  }
+  return Lref;
 }
+
 
 #define SAMPLE_NUM 1
 
 void main() {
   float s = InitRand(gl_FragCoord.xy);
   vec2 uv = GetScreenCoordinate(vPosWorld.xyz);
-
-  vec3 L = EvalDirectionalLight(uv);
-  vec3 color = pow(clamp(L, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
+  vec3 Ldir = EvalDirectionalLight(uv);                                                       //直接光照
+  vec3 Lref = EvalReflectionalLight(uv);                                                      //镜面反射
+  vec3 color = pow(clamp(Lref + Ldir, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
   gl_FragColor = vec4(vec3(color.rgb), 1.0);
 }
