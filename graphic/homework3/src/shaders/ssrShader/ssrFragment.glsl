@@ -2,6 +2,8 @@
 precision highp float;
 #endif
 
+#define SAMPLE_NUM 5
+
 uniform vec3 uLightDir;     //已经在CalcShadingDirection中取反
 uniform vec3 uCameraPos;
 uniform vec3 uLightRadiance;
@@ -173,14 +175,31 @@ vec3 EvalReflectionalLight(vec2 uv){
   return Lref;
 }
 
+vec3 EvalIndirectionalLight(vec2 uv,float s){
+  vec3 Lind = vec3(0.);
+  for(int i = 0;i<=SAMPLE_NUM;i++){
+    float pdf = 0.;
+    vec3 hitpos = vec3(0.);
+    vec3 ray_dir = SampleHemisphereUniform(s,pdf);
+    if(RayMarch(vPosWorld.xyz,ray_dir,hitpos))
+    {
+      vec3 Li = EvalDirectionalLight(GetScreenCoordinate(hitpos));
+      Lind += EvalDiffuse(ray_dir,ray_dir,uv) * Li;                       //此处p点是diffuse的，所以出射方向对bsdf不重要，第二个参数随便填一个
+    }
+  }
 
-#define SAMPLE_NUM 1
+  return Lind / float(SAMPLE_NUM);
+}
+
+
+
 
 void main() {
   float s = InitRand(gl_FragCoord.xy);
   vec2 uv = GetScreenCoordinate(vPosWorld.xyz);
   vec3 Ldir = EvalDirectionalLight(uv);                                                       //直接光照
   vec3 Lref = EvalReflectionalLight(uv);                                                      //镜面反射
-  vec3 color = pow(clamp(Lref + Ldir, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
+  vec3 Lind = EvalIndirectionalLight(uv,s);
+  vec3 color = pow(clamp(Ldir+Lind, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
   gl_FragColor = vec4(vec3(color.rgb), 1.0);
 }

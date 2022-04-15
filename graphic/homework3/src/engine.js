@@ -85,9 +85,9 @@ function GAMES202Main() {
 	renderer.addLight(directionLight);
 
 	// Add shapes
-	loadGLTF(renderer, 'assets/cube/', 'cube1', 'SSRMaterial');
+	//loadGLTF(renderer, 'assets/cube/', 'cube1', 'SSRMaterial');
 	// loadGLTF(renderer, 'assets/cube/', 'cube2', 'SSRMaterial');
-	// loadGLTF(renderer, 'assets/cave/', 'cave', 'SSRMaterial');
+	 loadGLTF(renderer, 'assets/cave/', 'cave', 'SSRMaterial');
 
 	function createGUI() {
 		const gui = new dat.gui.GUI();
