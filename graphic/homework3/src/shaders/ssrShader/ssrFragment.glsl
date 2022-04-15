@@ -133,12 +133,12 @@ vec3 Reflect(vec3 i,vec3 n){
 }
 
 bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
-  float step= 0.05;
+  float step= 0.04;
   vec3 end = vec3(0);
   for(float i = 0.; i < 200.; i++)
   {
     end = ori + i * step * dir;
-    if(GetDepth(end) - 0.1 > GetGBufferDepth(GetScreenCoordinate(end)))
+    if(GetDepth(end) - 0.000001 > GetGBufferDepth(GetScreenCoordinate(end) ))
     {
       hitPos = end;
       return true;
