@@ -13,6 +13,7 @@ uniform sampler2D uGNormalWorld;
 uniform sampler2D uGShadow;
 uniform sampler2D uGPosWorld;
 
+
 varying mat4 vWorldToScreen;
 varying highp vec4 vPosWorld;
 
@@ -200,6 +201,6 @@ void main() {
   vec3 Ldir = EvalDirectionalLight(uv);                                                       //直接光照
   vec3 Lref = EvalReflectionalLight(uv);                                                      //镜面反射
   vec3 Lind = EvalIndirectionalLight(uv,s);
-  vec3 color = pow(clamp(Ldir+Lind, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
+  vec3 color = pow(clamp(Ldir, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2));
   gl_FragColor = vec4(vec3(color.rgb), 1.0);
 }
