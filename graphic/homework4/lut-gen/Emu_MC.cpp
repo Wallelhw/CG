@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include "stb_image_write.h"
 
 const int resolution = 128;
+const float SchlicksRo = pow(2.96 / 4.96, 2);
 
 typedef struct samplePoints {
     std::vector<Vec3f> directions;
@@ -80,12 +82,21 @@ Vec3f IntegrateBRDF(Vec3f V, float roughness, float NdotV) {
     const int sample_count = 1024;
     Vec3f N = Vec3f(0.0, 0.0, 1.0);
     
-    samplePoints sampleList = squareToCosineHemisphere(sample_count);
-    for (int i = 0; i < sample_count; i++) {
-      // TODO: To calculate (fr * ni) / p_o here
-      
-    }
+    samplePoints sampleList = squareToCosineHemisphere(sample_count);                           //Cos加权采样的入射向量
+    for (int i = 0; i < sample_count; i++) {                                                    //蒙特卡洛解双重积分把两个自变量的定义域乘起来就行
+      // TODO: To calculate (fr * ni) / p_o here                                                // ni = sin(theta) 此处ni就是mu  ,/p-o 是除概率密度（蒙特卡洛解积分）   
+        Vec3f vi = sampleList.directions[i];
+        Vec3f vo = V;
+        float pdf = sampleList.PDFs[i];
+        float Fresnel = SchlicksRo + (1 - SchlicksRo) * powf(1 - V.x, 5);                       //Fresnel项使用Schlicks近似处理
+        float Distribution_normal = DistributionGGX(N, (vi + vo) / 2, roughness);               //Distribution GGX近似处理
+        float Geometry = GeometrySmith(roughness, dot(N, vi), dot(N, vo));
+        float fr = Fresnel * Geometry * Distribution_normal / (4 * dot(vi, N) * dot(vo, N));
+        A += fr * NdotV / pdf;
 
+    }
+    B = A;//RGB3通道没有做特殊处理
+    C = A;
     return {A / sample_count, B / sample_count, C / sample_count};
 }
 
@@ -94,11 +105,10 @@ int main() {
     float step = 1.0 / resolution;
     for (int i = 0; i < resolution; i++) {
         for (int j = 0; j < resolution; j++) {
-            float roughness = step * (static_cast<float>(i) + 0.5f);
-            float NdotV = step * (static_cast<float>(j) + 0.5f);
-            Vec3f V = Vec3f(std::sqrt(1.f - NdotV * NdotV), 0.f, NdotV);
-
-            Vec3f irr = IntegrateBRDF(V, roughness, NdotV);
+            float roughness = step * (static_cast<float>(i) + 0.5f);// rough 0-1
+            float NdotV = step * (static_cast<float>(j) + 0.5f);    // sin   0-1                //NdV应该是cos啊大哥，你这命名，我tm直接血压拉满
+            Vec3f V = Vec3f(std::sqrt(1.f - NdotV * NdotV), 0.f, NdotV);                        //(cos,o,sin) 出射向量
+            Vec3f irr = IntegrateBRDF(V, roughness, NdotV); 
 
             data[(i * resolution + j) * 3 + 0] = uint8_t(irr.x * 255.0);
             data[(i * resolution + j) * 3 + 1] = uint8_t(irr.y * 255.0);
@@ -107,7 +117,6 @@ int main() {
     }
     stbi_flip_vertically_on_write(true);
     stbi_write_png("GGX_E_MC_LUT.png", resolution, resolution, 3, data, resolution * 3);
-    
     std::cout << "Finished precomputed!" << std::endl;
     return 0;
 }

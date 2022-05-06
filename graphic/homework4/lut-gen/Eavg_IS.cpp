@@ -90,7 +90,8 @@ int main() {
         // | 
         // | rough（i）
         // Flip it, if you want the data written to the texture
-        uint8_t data[resolution * resolution * 3];
+        uint8_t* data = new uint8_t[resolution * resolution * 3];
+
         float step = 1.0 / resolution;
         Vec3f Eavg = Vec3f(0.0);
 		for (int i = 0; i < resolution; i++) 
@@ -115,6 +116,7 @@ int main() {
 		}
 		stbi_flip_vertically_on_write(true);
 		stbi_write_png("GGX_Eavg_LUT.png", resolution, resolution, channel, data, 0);
+        delete[] data;
 	}
 	stbi_image_free(Edata);
     return 0;
