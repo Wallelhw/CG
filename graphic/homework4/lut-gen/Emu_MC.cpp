@@ -83,17 +83,22 @@ Vec3f IntegrateBRDF(Vec3f V, float roughness, float NdotV) {
     Vec3f N = Vec3f(0.0, 0.0, 1.0);
     
     samplePoints sampleList = squareToCosineHemisphere(sample_count);                           //Cos加权采样的入射向量
-    for (int i = 0; i < sample_count; i++) {                                                    //蒙特卡洛解双重积分把两个自变量的定义域乘起来就行
+    for (int i = 0; i < sample_count; i++) {                                                    //蒙特卡洛解双重积分把两个自变量的(定义域乘起来就行 均匀采样；特殊采样要除pdf）
       // TODO: To calculate (fr * ni) / p_o here                                                // ni = sin(theta) 此处ni就是mu  ,/p-o 是除概率密度（蒙特卡洛解积分）   
-        Vec3f vi = sampleList.directions[i];
-        Vec3f vo = V;
-        Vec3f h = normalize((vi + vo) / 2.);
-        float pdf = sampleList.PDFs[i];
-        float Fresnel = 1.;                                                                      //Fresnel项使用Schlicks近似处理(白炉中不考虑F项)
-        float Distribution_normal = DistributionGGX(N, h, roughness);                            //Distribution GGX近似处理
-        float Geometry = GeometrySmith(roughness,std::max(dot(h, vi),0.f), std::max(dot(h, vo),0.f));
-        float fr =  Fresnel * Geometry * Distribution_normal / (4. * dot(vi, N) * dot(vo, N));
-        A += 2. * M_PI * fr *  NdotV *(1./ pdf);
+        Vec3f vi = sampleList.directions[i];                                                    //入射向量
+        Vec3f vo = V;                                                                           //出射向量
+        Vec3f h = normalize(vi + vo);                                                           //半程向量
+        float pdf = sampleList.PDFs[i];                                                         //当前采样概率密度
+        float NoV = std::max(dot(N, vo), 0.f);
+        float NoL = std::max(dot(N, vi), 0.f);
+        float HoV = std::max(dot(h, vo), 0.f);
+        float HoL = std::max(dot(h, vi), 0.f);
+        float sin_theta = std::sqrt(1.f - NoL * NoL);
+        float F = 1.;                                                                            //Fresnel项使用Schlicks近似处理(白炉中不考虑F项)
+        float D = DistributionGGX(N, h, roughness);                                              //Distribution GGX近似处理
+        float G = GeometrySmith(roughness, NoL, NoV);
+        float fr = F * G * D / (4. * NoV * NoL);
+        A +=  fr * sin_theta * (1./ pdf);
     }
     B = A;//RGB3通道没有做特殊处理
     C = A;
