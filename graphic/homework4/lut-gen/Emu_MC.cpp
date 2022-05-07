@@ -13,7 +13,7 @@
 #include "stb_image_write.h"
 
 const int resolution = 128;
-const float SchlicksRo = pow(2.96 / 4.96, 2);
+const float SchlicksRo = pow(0.3 / 2.3, 2);
 
 typedef struct samplePoints {
     std::vector<Vec3f> directions;
@@ -87,17 +87,17 @@ Vec3f IntegrateBRDF(Vec3f V, float roughness, float NdotV) {
       // TODO: To calculate (fr * ni) / p_o here                                                // ni = sin(theta) 此处ni就是mu  ,/p-o 是除概率密度（蒙特卡洛解积分）   
         Vec3f vi = sampleList.directions[i];
         Vec3f vo = V;
+        Vec3f h = normalize((vi + vo) / 2.);
         float pdf = sampleList.PDFs[i];
-        float Fresnel = SchlicksRo + (1 - SchlicksRo) * powf(1 - V.x, 5);                       //Fresnel项使用Schlicks近似处理
-        float Distribution_normal = DistributionGGX(N, (vi + vo) / 2, roughness);               //Distribution GGX近似处理
-        float Geometry = GeometrySmith(roughness, dot(N, vi), dot(N, vo));
-        float fr = Fresnel * Geometry * Distribution_normal / (4 * dot(vi, N) * dot(vo, N));
-        A += fr * NdotV / pdf;
-
+        float Fresnel = 1.;                                                                      //Fresnel项使用Schlicks近似处理(白炉中不考虑F项)
+        float Distribution_normal = DistributionGGX(N, h, roughness);                            //Distribution GGX近似处理
+        float Geometry = GeometrySmith(roughness,std::max(dot(h, vi),0.f), std::max(dot(h, vo),0.f));
+        float fr =  Fresnel * Geometry * Distribution_normal / (4. * dot(vi, N) * dot(vo, N));
+        A += 2. * M_PI * fr *  NdotV *(1./ pdf);
     }
     B = A;//RGB3通道没有做特殊处理
     C = A;
-    return {A / sample_count, B / sample_count, C / sample_count};
+    return {A / float(sample_count), B / float(sample_count), C / float(sample_count)};
 }
 
 int main() {
