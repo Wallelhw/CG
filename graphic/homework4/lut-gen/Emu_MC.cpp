@@ -60,7 +60,7 @@ float DistributionGGX(Vec3f N, Vec3f H, float roughness)
 
 float GeometrySchlickGGX(float NdotV, float roughness) {
     float a = roughness;
-    float k = (a * a) / 2.0f;
+    float k = (a+1) * (a+1) / 8.0f;
 
     float nom = NdotV;
     float denom = NdotV * (1.0f - k) + k;
@@ -75,7 +75,7 @@ float GeometrySmith(float roughness, float NoV, float NoL) {
     return ggx1 * ggx2;
 }
 
-Vec3f IntegrateBRDF(Vec3f V, float roughness, float NdotV) {
+Vec3f IntegrateBRDF(Vec3f V, float roughness, float sintheta) {
     float A = 0.0;
     float B = 0.0;
     float C = 0.0;
@@ -93,12 +93,11 @@ Vec3f IntegrateBRDF(Vec3f V, float roughness, float NdotV) {
         float NoL = std::max(dot(N, vi), 0.f);
         float HoV = std::max(dot(h, vo), 0.f);
         float HoL = std::max(dot(h, vi), 0.f);
-        float sin_theta = std::sqrt(1.f - NoL * NoL);
         float F = 1.;                                                                            //Fresnel项使用Schlicks近似处理(白炉中不考虑F项)
         float D = DistributionGGX(N, h, roughness);                                              //Distribution GGX近似处理
-        float G = GeometrySmith(roughness, NoL, NoV);
+        float G = GeometrySmith(roughness, HoL, HoV);
         float fr = F * G * D / (4. * NoV * NoL);
-        A +=  fr * sin_theta * (1./ pdf);
+        A +=  fr * sintheta * (1./ pdf);
     }
     B = A;//RGB3通道没有做特殊处理
     C = A;
@@ -111,9 +110,9 @@ int main() {
     for (int i = 0; i < resolution; i++) {
         for (int j = 0; j < resolution; j++) {
             float roughness = step * (static_cast<float>(i) + 0.5f);// rough 0-1
-            float NdotV = step * (static_cast<float>(j) + 0.5f);    // sin   0-1                //NdV应该是cos啊大哥，你这命名，我tm直接血压拉满
-            Vec3f V = Vec3f(std::sqrt(1.f - NdotV * NdotV), 0.f, NdotV);                        //(cos,o,sin) 出射向量
-            Vec3f irr = IntegrateBRDF(V, roughness, NdotV); 
+            float sintheta = step * (static_cast<float>(j) + 0.5f);    // sin   0-1                //NoV应该是cos啊大哥，你这命名，我tm直接血压拉满
+            Vec3f V = Vec3f(std::sqrt(1.f - sintheta * sintheta), 0.f, sintheta);                        //(cos,o,sin) 出射向量
+            Vec3f irr = IntegrateBRDF(V, roughness, sintheta);
 
             data[(i * resolution + j) * 3 + 0] = uint8_t(irr.x * 255.0);
             data[(i * resolution + j) * 3 + 1] = uint8_t(irr.y * 255.0);
