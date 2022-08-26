@@ -2,3 +2,4 @@
 *.7z
 HWRayTracer/.vs
 HWRayTracer/out
+/graphic/homework4/lut-gen/bin

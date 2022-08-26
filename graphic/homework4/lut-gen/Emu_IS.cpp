@@ -14,7 +14,7 @@
 
 const int resolution = 128;
 
-Vec2f Hammersley(uint32_t i, uint32_t N) { // 0-1
+Vec2f Hammersley(uint32_t i, uint32_t N) { // 0-1   在0-1的范围内采样N次，结果均匀，返回采样进度和当前一次的采样结果
     uint32_t bits = (i << 16u) | (i >> 16u);
     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
@@ -24,26 +24,31 @@ Vec2f Hammersley(uint32_t i, uint32_t N) { // 0-1
     return {float(i) / float(N), rdi};
 }
 
-Vec3f ImportanceSampleGGX(Vec2f Xi, Vec3f N, float roughness) {
-    float a = roughness * roughness;
-
+Vec3f ImportanceSampleGGX(Vec2f Xi, Vec3f N, float roughness) { // Xi Vec2f(采样进度，当前0-1均匀采样的结果)；N 宏观法线；roughness 粗糙度
     //TODO: in spherical space - Bonus 1
+    float a_2 = roughness * roughness;
+    float phi = Xi.x*2*PI;
+    float cos_theta = sqrtf((1 - Xi.y) / (1 + Xi.y * (a_2 - 1)));       //D项计算出pdf_m,再计算出theta边缘概率密度，反推theta值，重要性采样体现在这里
+    float sin_theta = sqrtf(1 - cos_theta * cos_theta);
 
 
-    //TODO: from spherical space to cartesian space - Bonus 1
- 
+    Vec3f H = Vec3f(.0f);
+    H.x = sinf(phi) * sin_theta;
+    H.y = cosf(phi) * sin_theta;
+    H.z = cos_theta;
 
-    //TODO: tangent coordinates - Bonus 1
-
-
-    //TODO: transform H to tangent space - Bonus 1
-    
-    return Vec3f(1.0f);
+    return H;
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness) {
     // TODO: To calculate Schlick G1 here - Bonus 1
-    
+    float a = roughness;
+    float k = (a + 1) * (a + 1) / 8.0f;
+
+    float nom = NdotV;
+    float denom = NdotV * (1.0f - k) + k;
+
+    return nom / denom;
     return 1.0f;
 }
 
@@ -56,26 +61,26 @@ float GeometrySmith(float roughness, float NoV, float NoL) {
 
 Vec3f IntegrateBRDF(Vec3f V, float roughness) {
 
-    const int sample_count = 1024;
+    const float sample_count = 1024.0;
     Vec3f N = Vec3f(0.0, 0.0, 1.0);
+    float split_sum = .0f;
     for (int i = 0; i < sample_count; i++) {
-        Vec2f Xi = Hammersley(i, sample_count);
-        Vec3f H = ImportanceSampleGGX(Xi, N, roughness);
+        Vec2f Xi = Hammersley(i, sample_count);                             //Xi为（0-1，0-1）空间中，正则采样的点
+        Vec3f H = ImportanceSampleGGX(Xi, N, roughness);                    //仅把（0-1）^2的两个值转化为一个向量，重要性计算体现在pdf计算与化简的过程中
         Vec3f L = normalize(H * 2.0f * dot(V, H) - V);
-
         float NoL = std::max(L.z, 0.0f);
         float NoH = std::max(H.z, 0.0f);
         float VoH = std::max(dot(V, H), 0.0f);
         float NoV = std::max(dot(N, V), 0.0f);
         
         // TODO: To calculate (fr * ni) / p_o here - Bonus 1
-
-
+        float G = GeometrySmith(roughness,NoV,NoL);
+        float weight_L = (G * VoH) / (NoV * NoH);                           //此处为化简公式，已经做了通用蒙特卡洛乘1/pdf的过程，pdf（h）转pdf（i）的过程中出现了D，D项被销，F=1故fr中只剩下了G项
         // Split Sum - Bonus 2
-        
-    }
-
-    return Vec3f(1.0f);
+        split_sum += weight_L;
+    } 
+    float integral_res = split_sum / sample_count;                           //蒙特卡洛解积分通用方法
+    return Vec3f(integral_res, integral_res, integral_res);
 }
 
 int main() {
